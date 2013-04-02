@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 		"CSIDL_APPDATA",
 		详细见MSDN
 		
-另外还有另一个API可用：		SHGetSpecialFolderPath
+另外还有另一个API可用：		SHGetSpecialFolderPath，据MSDN说，GetFolderPath是GetSpecialFolderPath的超集。
 
 
 */
