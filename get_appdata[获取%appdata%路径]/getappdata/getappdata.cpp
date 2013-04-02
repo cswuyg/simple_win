@@ -30,3 +30,19 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+/*类似的还有：
+		"CSIDL_WINDOWS",
+		"CSIDL_SYSTEM",
+		"CSIDL_PROGRAM_FILES",
+		"CSIDL_DESKTOP",
+		"CSIDL_FAVORITES",
+		"CSIDL_FONTS",
+		"CSIDL_COOKIES",
+		"CSIDL_HISTORY",
+		"CSIDL_APPDATA",
+		详细见MSDN
+		
+另外还有另一个API可用：		SHGetSpecialFolderPath
+
+
+*/
