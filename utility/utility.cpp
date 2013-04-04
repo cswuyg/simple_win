@@ -137,6 +137,15 @@ std::wstring GetEnvironmentVariable( const std::wstring& key_name )
 	wchar_t* buf = new wchar_t[require_size];
 	::GetEnvironmentVariable(key_name.c_str(), buf, require_size);
 	return buf;
+
+	//下边的实现方式也可以
+	//std::wstring new_key = L"%";
+	//new_key += key_name;
+	//new_key += L"%";
+	//DWORD chValue = ::ExpandEnvironmentStrings(new_key.c_str(), NULL, 0);
+	//wchar_t* buf = new wchar_t[chValue];
+	//::ExpandEnvironmentStrings(new_key.c_str(), buf, chValue);
+	//return buf;
 }
 
 void AddEnvironmentVariable( const std::wstring& key_name, const std::wstring& add_value )
