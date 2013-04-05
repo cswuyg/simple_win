@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleJSON", "SimpleJSON\SimpleJSON.vcxproj", "{CC9A91DD-64F1-4D8D-B926-7E03E1312E1C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{512BC0DE-B21C-4038-962B-45C003098B77}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC9A91DD-64F1-4D8D-B926-7E03E1312E1C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CC9A91DD-64F1-4D8D-B926-7E03E1312E1C}.Debug|Win32.Build.0 = Debug|Win32
+		{CC9A91DD-64F1-4D8D-B926-7E03E1312E1C}.Release|Win32.ActiveCfg = Release|Win32
+		{CC9A91DD-64F1-4D8D-B926-7E03E1312E1C}.Release|Win32.Build.0 = Release|Win32
+		{512BC0DE-B21C-4038-962B-45C003098B77}.Debug|Win32.ActiveCfg = Debug|Win32
+		{512BC0DE-B21C-4038-962B-45C003098B77}.Debug|Win32.Build.0 = Debug|Win32
+		{512BC0DE-B21C-4038-962B-45C003098B77}.Release|Win32.ActiveCfg = Release|Win32
+		{512BC0DE-B21C-4038-962B-45C003098B77}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
