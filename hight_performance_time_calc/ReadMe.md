@@ -1,0 +1,2 @@
+高精度计时器，使用：QueryPerformanceFrequency\QueryPerformanceCounter
+精度值跟CPU主频相关，在CPU可变频时可能受影响。
