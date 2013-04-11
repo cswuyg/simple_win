@@ -5,5 +5,5 @@
 BitmapToRegion的优点是：不会出现闪烁。如果使用SetLayeredWindowAttributes实现，当背景窗口不断变化刷新时（譬如当背景窗口是播放器时）则会出现闪烁的问题。
 
 
-BitmapToRegion函数是由Jean-Edouard Lachand-Robert在1998年实现的，该函数有些小瑕疵，我对它最了小修改，详细参见代码。  
+BitmapToRegion函数是由Jean-Edouard Lachand-Robert在1998年实现的，该函数有些小瑕疵，我对它做了小修改，详细参见代码。  
 cswuyg@gmail.com
