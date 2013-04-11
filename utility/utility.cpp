@@ -157,4 +157,84 @@ void AddEnvironmentVariable( const std::wstring& key_name, const std::wstring& a
 }
 
 
+utility::ePageCode GetPageCode( char* content, int length )
+{
+	ePageCode ret = e_ANSI;
+	if (length >= 2)
+	{
+		byte b0 = *content;
+		byte b1 = *(content+1);
+		byte b2 = (length >= 3 ? *(content+2) : 0);
+		if (b0 == 0xFF && b1 == 0xFE)
+		{
+			ret = e_UNICODE;
+		}
+		else if (b0 == 0xFE && b1 == 0xFF)
+		{
+			ret = e_BigEnd;
+		}
+		else if (b0 == 0xEF && b1 == 0xBB && b2 == 0xBF)
+		{
+			ret = e_UTF8;
+		}
+		else if (IsNoBomUTF8Data(content, length))
+		{
+			ret = e_UTF8_NOBOM;
+		}
+	}
+	return ret;
+}
+
+bool IsNoBomUTF8Data( char* content, int length )
+{
+	int i = 0;
+	int size = length;
+
+	while(i < size)
+	{
+		int step = 0;
+		if((content[i] & 0x80) == 0x00)
+		{
+			step = 1;
+		}
+		else if((content[i] & 0xe0) == 0xc0)
+		{
+			if(i + 1 >= size) return false;
+			if((content[i + 1] & 0xc0) != 0x80)
+			{
+				return false;
+			}
+			step = 2;
+		}
+		else if((content[i] & 0xf0) == 0xe0)
+		{
+			if(i + 2 >= size)
+			{
+				return false;
+			}
+			if((content[i + 1] & 0xc0) != 0x80) 
+			{
+				return false;
+			}
+			if((content[i + 2] & 0xc0) != 0x80)
+			{
+				return false;
+			}
+			step = 3;
+		}
+		else
+		{
+			return false;
+		}
+
+		i += step;
+	}
+
+	if(i == size) 
+	{
+		return true;
+	}
+	return false;
+}
+
 }
