@@ -73,7 +73,7 @@ HRGN CTransparent::BitmapToRegion( HBITMAP hDDBBmp, COLORREF cTransparentColor /
 	HANDLE hHeap = HeapCreate( HEAP_NO_SERIALIZE, 0, 0 );
 	if (  hHeap == NULL )
 	{
-		DeleteObject( SelectObject( hMemDC, hDIBBmp ) );
+		DeleteObject( SelectObject( hMemDC, holdBmp ) );
 		DeleteDC( hMemDC );
 		return NULL;
 	}
@@ -223,7 +223,7 @@ void CTransparent::OnPaint( HWND hwnd, HDC hdc, const std::wstring& text )
 	HRGN hRgn = BitmapToRegion( hTextBmp, RGB(0,0,0), RGB(1,1,1) );
 	hTempBmp = (HBITMAP)::SelectObject(hMemDC, hTempBmp);
 	::DeleteObject(hTempBmp);
-	::SetWindowRgn(hwnd,hRgn, TRUE );
+	::SetWindowRgn(hwnd, hRgn, TRUE );
 	::BitBlt(hdc, client_rc.left, client_rc.top, client_rc.right - client_rc.left, client_rc.bottom - client_rc.top, hMemDC, client_rc.left, client_rc.top, SRCCOPY);
 	::SelectObject(hdc, hOldBmp);
 	::DeleteObject(hNewBmp);
