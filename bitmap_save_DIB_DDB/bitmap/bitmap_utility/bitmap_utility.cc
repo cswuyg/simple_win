@@ -1,268 +1,16 @@
-#include "utility.h"
+
+#include "bitmap_utility.h"
 #include <new.h>
 
-namespace utility
-{
-	namespace WYGFile
-	{
-BOOL WriteToDiskA( const std::wstring& strFilePath, std::string& data )
-{
-	BOOL bRet = FALSE;
-	HANDLE hFile = INVALID_HANDLE_VALUE;
-	do 
-	{
-		std::wstring strFilePathTmp = strFilePath + L".tmp";
-		hFile = ::CreateFile(strFilePathTmp.c_str(), GENERIC_WRITE | GENERIC_READ, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-		IF_BREAK(hFile == INVALID_HANDLE_VALUE);
-		DWORD dwWrite = 0;
-		DWORD dwLength = (DWORD)data.length();
-		::WriteFile(hFile, data.c_str(), dwLength, &dwWrite, NULL);
-		IF_BREAK(dwWrite != dwLength);
-		::CloseHandle(hFile);
-		hFile = INVALID_HANDLE_VALUE;
-		bRet = ::MoveFileEx(strFilePathTmp.c_str(), strFilePath.c_str(), MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH);
-	} while (FALSE);
-
-	if (hFile != INVALID_HANDLE_VALUE)
-	{
-		::CloseHandle(hFile);
-	}
-	return bRet;
-}
-
-BOOL ReadFromDiskA( const std::wstring& strFilePath, std::string& data )
-{
-	BOOL bRet = FALSE;
-	HANDLE hFile = INVALID_HANDLE_VALUE;
-	do 
-	{
-		hFile = ::CreateFile(strFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		IF_BREAK(hFile == INVALID_HANDLE_VALUE);
-
-		DWORD nCount = ::GetFileSize(hFile, NULL);
-		if (nCount == INVALID_FILE_SIZE)
-		{
-			//DWORD dwErr = GetLastError();
-			break;
-		}
-		DWORD nReturnCount = 0;
-		char* buf = new char[nCount+1];
-		::memset(buf, 0, nCount + 1);
-		::ReadFile(hFile, buf, nCount, &nReturnCount, NULL);
-		if (nReturnCount != nCount)
-		{
-			delete [] buf;
-			break;
-		}
-		data = buf;
-		delete [] buf;
-
-		::CloseHandle(hFile);
-		hFile = INVALID_HANDLE_VALUE;
-		bRet = TRUE;
-	} while (FALSE);
-
-	if (hFile != INVALID_HANDLE_VALUE)
-	{
-		::CloseHandle(hFile);
-	}
-	return bRet;
-}
-} //WYGFile
-
-namespace WYGString
-{
-std::wstring int2wstr( int nData )
-{
-	wchar_t wchBuf[32] = L"";
-	::swprintf_s(wchBuf, L"%d", nData);
-	return wchBuf;
-}
-
-std::string wstr2str( const std::wstring& strInput, int nEncode )
-{
-	if (strInput.empty())
-	{
-		return "";
-	}
-	int nLength = ::WideCharToMultiByte(nEncode, 0, strInput.c_str(), -1, 0, 0, 0, 0);
-	char* buf = new char[nLength + 1];
-	::memset(buf, 0, nLength + 1);
-	::WideCharToMultiByte(nEncode, 0, strInput.c_str(), -1, buf, nLength, 0, 0);
-	std::string strResult = buf;
-	delete[] buf;
-	return strResult;
-}
-
-std::wstring str2wstr( const std::string& strInput, int nEncode )
-{
-	if( strInput.empty() )
-	{
-		return L"";
-	}
-	int nLength = ::MultiByteToWideChar( nEncode, 0, strInput.c_str(), -1, 0, 0 );
-	wchar_t* buf = new wchar_t[nLength + 1];
-	::memset(buf, 0, ( nLength + 1 ) * 2);
-	::MultiByteToWideChar(nEncode, 0, strInput.c_str(), -1, buf, nLength);
-	std::wstring strResult = buf;
-	delete[] buf;
-	return strResult;
-}
-}
-namespace WYGAPP
-{
-std::wstring GetAppFullName()
-{
-	static std::wstring aplication_fullname;
-	if(aplication_fullname.empty())
-	{
-		wchar_t lpszFileName[MAX_PATH] = {0};
-		::GetModuleFileName(NULL, lpszFileName, MAX_PATH);
-		aplication_fullname = lpszFileName;
-	}
-	return aplication_fullname;
-}
-
-
-std::wstring GetModuleFullName()
-{
-	static std::wstring module_fullname;
-	if(module_fullname.empty())
-	{
-		static int lpAddress = 0;
-		HMODULE hMod = 0;
-		::GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCWSTR)&lpAddress, &hMod);
-		wchar_t lpszName[MAX_PATH] = {0};
-		::GetModuleFileName(hMod, lpszName, MAX_PATH);
-		module_fullname = lpszName;
-	}
-	return module_fullname;
-}
-}
-
-namespace WYGSys
-{
-std::wstring GetEnvironmentVariable( const std::wstring& key_name )
-{
-	DWORD require_size = ::GetEnvironmentVariable(key_name.c_str(), NULL, 0);
-	wchar_t* buf = new wchar_t[require_size];
-	::GetEnvironmentVariable(key_name.c_str(), buf, require_size);
-	return buf;
-
-	//ä¸‹è¾¹çš„å®ç°æ–¹å¼ä¹Ÿå¯ä»¥
-	//std::wstring new_key = L"%";
-	//new_key += key_name;
-	//new_key += L"%";
-	//DWORD chValue = ::ExpandEnvironmentStrings(new_key.c_str(), NULL, 0);
-	//wchar_t* buf = new wchar_t[chValue];
-	//::ExpandEnvironmentStrings(new_key.c_str(), buf, chValue);
-	//return buf;
-}
-
-void AddEnvironmentVariable( const std::wstring& key_name, const std::wstring& add_value )
-{
-	std::wstring new_value = GetEnvironmentVariable(key_name);
-	new_value += L";";
-	new_value += add_value;
-	::SetEnvironmentVariable(key_name.c_str(), new_value.c_str());
-}
-}
-
-
-namespace WYGPageCode
-{
-ePageCode GetPageCode( char* content, int length )
-{
-	ePageCode ret = e_ANSI;
-	if (length >= 2)
-	{
-		byte b0 = *content;
-		byte b1 = *(content+1);
-		byte b2 = (length >= 3 ? *(content+2) : 0);
-		if (b0 == 0xFF && b1 == 0xFE)
-		{
-			ret = e_UNICODE;
-		}
-		else if (b0 == 0xFE && b1 == 0xFF)
-		{
-			ret = e_BigEnd;
-		}
-		else if (b0 == 0xEF && b1 == 0xBB && b2 == 0xBF)
-		{
-			ret = e_UTF8;
-		}
-		else if (IsNoBomUTF8Data(content, length))
-		{
-			ret = e_UTF8_NOBOM;
-		}
-	}
-	return ret;
-}
-
-bool IsNoBomUTF8Data( char* content, int length )
-{
-	int i = 0;
-	int size = length;
-
-	while(i < size)
-	{
-		int step = 0;
-		if((content[i] & 0x80) == 0x00)
-		{
-			step = 1;
-		}
-		else if((content[i] & 0xe0) == 0xc0)
-		{
-			if(i + 1 >= size) return false;
-			if((content[i + 1] & 0xc0) != 0x80)
-			{
-				return false;
-			}
-			step = 2;
-		}
-		else if((content[i] & 0xf0) == 0xe0)
-		{
-			if(i + 2 >= size)
-			{
-				return false;
-			}
-			if((content[i + 1] & 0xc0) != 0x80) 
-			{
-				return false;
-			}
-			if((content[i + 2] & 0xc0) != 0x80)
-			{
-				return false;
-			}
-			step = 3;
-		}
-		else
-		{
-			return false;
-		}
-
-		i += step;
-	}
-
-	if(i == size) 
-	{
-		return true;
-	}
-	return false;
-}
-}
-
-namespace WYGBmp
-{
 int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 {
-	BITMAP       Bitmap; //ä½å›¾å±æ€§ç»“æ„ 
-	//è®¡ç®—ä½å›¾æ–‡ä»¶æ¯ä¸ªåƒç´ æ‰€å å­—èŠ‚æ•° 
+	BITMAP       Bitmap; //Î»Í¼ÊôĞÔ½á¹¹ 
+	//¼ÆËãÎ»Í¼ÎÄ¼şÃ¿¸öÏñËØËùÕ¼×Ö½ÚÊı 
 	HDC hTempDC = ::CreateDC(L"DISPLAY", NULL, NULL, NULL); 
-	int iBits = ::GetDeviceCaps(hTempDC, BITSPIXEL) * ::GetDeviceCaps(hTempDC, PLANES); //å½“å‰æ˜¾ç¤ºåˆ†è¾¨ç‡ä¸‹æ¯ä¸ªåƒç´ æ‰€å å­—èŠ‚æ•° 
+	int iBits = ::GetDeviceCaps(hTempDC, BITSPIXEL) * ::GetDeviceCaps(hTempDC, PLANES); //µ±Ç°ÏÔÊ¾·Ö±æÂÊÏÂÃ¿¸öÏñËØËùÕ¼×Ö½ÚÊı 
 	::DeleteDC(hTempDC); 
 
-	WORD wBitCount = 0; //ä½å›¾ä¸­æ¯ä¸ªåƒç´ æ‰€å ä½æ•°
+	WORD wBitCount = 0; //Î»Í¼ÖĞÃ¿¸öÏñËØËùÕ¼Î»Êı
 	if (iBits <= 1) 
 		wBitCount = 1; 
 	else if (iBits <= 4) 
@@ -274,8 +22,8 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	else if (iBits <= 32)
 		wBitCount = 32;
 
-	//è®¡ç®—è°ƒè‰²æ¿æ‰€å ç©ºé—´
-	//å¦‚æœä¸€ä¸ªåƒç´ æ‰€å ç©ºé—´å°äºç­‰äº8ä½ï¼Œåˆ™ä½¿ç”¨è°ƒè‰²æ¿ï¼Œå¦åˆ™ç›´æ¥å­˜å‚¨RGBå€¼
+	//¼ÆËãµ÷É«°åËùÕ¼¿Õ¼ä
+	//Èç¹ûÒ»¸öÏñËØËùÕ¼¿Õ¼äĞ¡ÓÚµÈÓÚ8Î»£¬ÔòÊ¹ÓÃµ÷É«°å£¬·ñÔòÖ±½Ó´æ´¢RGBÖµ
 	DWORD dwPaletteSize=0;
 	if (wBitCount <= 8) 
 	{
@@ -283,15 +31,15 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	}
 
 	 DWORD dwDIBSize, dwWritten; 
-	//è·å–DDBä½å›¾ä¿¡æ¯ï¼Œç„¶åè®¾ç½®æ–‡ä»¶ä½å›¾ä¿¡æ¯å¤´ç»“æ„ 
+	//»ñÈ¡DDBÎ»Í¼ĞÅÏ¢£¬È»ºóÉèÖÃÎÄ¼şÎ»Í¼ĞÅÏ¢Í·½á¹¹ 
 	::GetObject(hDDBmap, sizeof(BITMAP), (LPSTR)&Bitmap); 
-	BITMAPINFOHEADER bi; //ä½å›¾ä¿¡æ¯å¤´ç»“æ„ 
+	BITMAPINFOHEADER bi; //Î»Í¼ĞÅÏ¢Í·½á¹¹ 
 	::memset(&bi, 0, sizeof(BITMAPINFOHEADER));
 	bi.biSize = sizeof(BITMAPINFOHEADER); 
 	bi.biWidth = Bitmap.bmWidth; 
 	bi.biHeight = Bitmap.bmHeight; 
 	bi.biPlanes = 1; 
-	bi.biBitCount = wBitCount;  //ä¸€ä¸ªåƒç´ ç‚¹å ç”¨çš„ä½æ•°
+	bi.biBitCount = wBitCount;  //Ò»¸öÏñËØµãÕ¼ÓÃµÄÎ»Êı
 	bi.biCompression = BI_RGB; 
 	//bi.biSizeImage = 0; 
 	//bi.biXPelsPerMeter = 0; 
@@ -299,11 +47,11 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	//bi.biClrUsed = 0; 
 	//bi.biClrImportant = 0; 
 	
-	DWORD dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;   //å‘ä¸Šå–æ•´ï¼Œè®¡å­—èŠ‚æ•°
-	//ä¸ºä½å›¾å†…å®¹åˆ†é…å†…å­˜ 
-	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //ä½å›¾ä¿¡æ¯å¤´ç»“æ„ 
+	DWORD dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;   //ÏòÉÏÈ¡Õû£¬¼Æ×Ö½ÚÊı
+	//ÎªÎ»Í¼ÄÚÈİ·ÖÅäÄÚ´æ 
+	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //Î»Í¼ĞÅÏ¢Í·½á¹¹ 
 	*lpbi = bi; 
-	// å¤„ç†è°ƒè‰²æ¿   
+	// ´¦Àíµ÷É«°å   
 	HANDLE hOldPal = NULL;
 	HDC hDCPalatte = NULL;
 	HANDLE hPal = ::GetStockObject(DEFAULT_PALETTE); 
@@ -313,9 +61,9 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		hOldPal = ::SelectPalette(hDCPalatte, (HPALETTE)hPal, FALSE); 
 		::RealizePalette(hDCPalatte); 
 	} 
-	// è·å–è¯¥è°ƒè‰²æ¿ä¸‹æ–°çš„åƒç´ å€¼ 
+	// »ñÈ¡¸Ãµ÷É«°åÏÂĞÂµÄÏñËØÖµ 
 	::GetDIBits(hDCPalatte, hDDBmap, 0, (UINT) Bitmap.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO) lpbi, DIB_RGB_COLORS); 
-	//æ¢å¤è°ƒè‰²æ¿   
+	//»Ö¸´µ÷É«°å   
 	if (hOldPal) 
 	{ 
 		::SelectPalette(hDCPalatte, (HPALETTE)hOldPal, TRUE); 
@@ -323,7 +71,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		::ReleaseDC(NULL, hDCPalatte); 
 	} 
 
-	//åˆ›å»ºä½å›¾æ–‡ä»¶   
+	//´´½¨Î»Í¼ÎÄ¼ş   
 	HANDLE hFile = ::CreateFile(lpFileName, GENERIC_WRITE, 
 		0, NULL, CREATE_ALWAYS, 
 		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL); 
@@ -332,20 +80,20 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		delete [] lpbi;
 		return -1; 
 	}
-	//è®¾ç½®ä½å›¾æ–‡ä»¶å¤´
-	BITMAPFILEHEADER bmfHdr; //ä½å›¾æ–‡ä»¶å¤´ç»“æ„ 
+	//ÉèÖÃÎ»Í¼ÎÄ¼şÍ·
+	BITMAPFILEHEADER bmfHdr; //Î»Í¼ÎÄ¼şÍ·½á¹¹ 
 	::memset(&bmfHdr, 0, sizeof(BITMAPFILEHEADER));
 	bmfHdr.bfType = 0x4D42;   // "BM " 
-	//ä½å›¾æ–‡ä»¶å¤§å°ï¼šä½å›¾æ–‡ä»¶å¤´ +ã€€ä½å›¾ä¿¡æ¯å¤´ + è°ƒè‰²æ¿ç©ºé—´ + ä½å›¾çœŸå®æ•°æ®ç©ºé—´
+	//Î»Í¼ÎÄ¼ş´óĞ¡£ºÎ»Í¼ÎÄ¼şÍ· +¡¡Î»Í¼ĞÅÏ¢Í· + µ÷É«°å¿Õ¼ä + Î»Í¼ÕæÊµÊı¾İ¿Õ¼ä
 	dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;   
 	bmfHdr.bfSize = dwDIBSize; 
 	/*bmfHdr.bfReserved1 = 0; 
 	bmfHdr.bfReserved2 = 0;*/ 
-	//ä½å›¾çœŸå®æ•°æ®ä½ç½®ï¼šä½å›¾æ–‡ä»¶å¤´ +ã€€ä½å›¾ä¿¡æ¯å¤´ + è°ƒè‰²æ¿ç©ºé—´
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // å†™å…¥ä½å›¾æ–‡ä»¶å¤´ 
+	//Î»Í¼ÕæÊµÊı¾İÎ»ÖÃ£ºÎ»Í¼ÎÄ¼şÍ· +¡¡Î»Í¼ĞÅÏ¢Í· + µ÷É«°å¿Õ¼ä
+	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // Ğ´ÈëÎ»Í¼ÎÄ¼şÍ· 
 
 	::WriteFile(hFile, (LPSTR)&bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL); 
-	// å†™å…¥ä½å›¾æ–‡ä»¶å…¶ä½™å†…å®¹ 
+	// Ğ´ÈëÎ»Í¼ÎÄ¼şÆäÓàÄÚÈİ 
 	::WriteFile(hFile, (LPSTR)lpbi, dwDIBSize, &dwWritten, NULL);   
 
 	::CloseHandle(hFile); 
@@ -373,7 +121,7 @@ HANDLE DDBToDIB( HBITMAP bitmap, DWORD dwCompression, HPALETTE Pal )
 	bi.biCompression = dwCompression;
 	// Compute the size of the infoheader and the color table
 	int nColors = 0;
-	//ä¸€ä¸ªåƒç´ ç‚¹ä½¿ç”¨å°äºç­‰äº8ä½è¡¨ç¤ºï¼Œåˆ™éœ€è¦è°ƒè‰²æ¿
+	//Ò»¸öÏñËØµãÊ¹ÓÃĞ¡ÓÚµÈÓÚ8Î»±íÊ¾£¬ÔòĞèÒªµ÷É«°å
 	if (bi.biBitCount <= 8)
 	{
 		nColors = bi.biClrUsed ? bi.biClrUsed : 1 << bi.biBitCount;
@@ -413,7 +161,7 @@ HANDLE DDBToDIB( HBITMAP bitmap, DWORD dwCompression, HPALETTE Pal )
 	// Each scan line of the image is aligned on a DWORD (32bit) boundary
 	if (bi.biSizeImage == 0)
 	{
-		//32çš„å€æ•°
+		//32µÄ±¶Êı
 		bi.biSizeImage = (((bi.biWidth * bi.biBitCount + 31)& ~31) / 8) * bi.biHeight;
 		// If a compression scheme is used the result may infact be larger
 		// Increase the size to account for this.
@@ -459,7 +207,7 @@ HBITMAP DIBToDDB( HANDLE hDIB )
 
 	lpbi = (LPBITMAPINFOHEADER)hDIB;
 	int nColors = 0;
-	//æ¯ä¸ªåƒç´ ç”¨å°äºç­‰äº8ä½è¡¨ç¤ºæ—¶ï¼Œæ‰æœ‰è°ƒè‰²æ¿
+	//Ã¿¸öÏñËØÓÃĞ¡ÓÚµÈÓÚ8Î»±íÊ¾Ê±£¬²ÅÓĞµ÷É«°å
 	if ( lpbi->biBitCount <= 8)
 	{
 		nColors = lpbi->biClrUsed ? lpbi->biClrUsed : 1 << lpbi->biBitCount;
@@ -521,12 +269,12 @@ HBITMAP TransBitmap( HBITMAP hbm )
 {
 	HDC hDCA = ::CreateDC( L"DISPLAY", 0, 0, 0 );
 	int nBitsColor = ::GetDeviceCaps(hDCA, BITSPIXEL);
-	int nBitCount = nBitsColor * ::GetDeviceCaps(hDCA, PLANES); //æ¯ä¸ªåƒç´ çš„bit
+	int nBitCount = nBitsColor * ::GetDeviceCaps(hDCA, PLANES); //Ã¿¸öÏñËØµÄbit
 	::DeleteDC(hDCA);
 
 	BITMAP bm;
 	::GetObject(hbm, sizeof(BITMAP), &bm);
-	//å¡«å…… BITMAPå¤´
+	//Ìî³ä BITMAPÍ·
 	BITMAPINFOHEADER bmih = {0};
 	bmih.biSize = sizeof(BITMAPINFOHEADER);
 	bmih.biBitCount = (WORD)nBitCount;
@@ -541,14 +289,14 @@ HBITMAP TransBitmap( HBITMAP hbm )
 	}
 
 	int nDIBHeadSize = sizeof(BITMAPINFOHEADER) + nColors * sizeof(RGBQUAD);
-	int nbitSize = ((bm.bmWidth * nBitCount + 31) & ~31) / 8 * bmih.biHeight + nDIBHeadSize;   // bi.biSizeImageæ˜¯DWORDçš„å€æ•°
+	int nbitSize = ((bm.bmWidth * nBitCount + 31) & ~31) / 8 * bmih.biHeight + nDIBHeadSize;   // bi.biSizeImageÊÇDWORDµÄ±¶Êı
 
 	LPVOID lpDIB = new(std::nothrow) char[nbitSize];  
 	if (lpDIB != NULL)
 	{
 		RtlZeroMemory(lpDIB, nbitSize);
 		memcpy( lpDIB, &bmih, sizeof(BITMAPINFOHEADER) );
-		//è®¾ç½®è°ƒè‰²æ¿ï¼Œå¤§äº256è‰²çš„DIBå›¾æ˜¯æ²¡æœ‰è°ƒè‰²æ¿çš„
+		//ÉèÖÃµ÷É«°å£¬´óÓÚ256É«µÄDIBÍ¼ÊÇÃ»ÓĞµ÷É«°åµÄ
 		HDC DIBHdc = ::GetDC( NULL );
 		BOOL  bNeedPalette = false;
 		if( nColors != 0 && ::GetDeviceCaps(DIBHdc, RASTERCAPS) & RC_PALETTE)
@@ -564,7 +312,7 @@ HBITMAP TransBitmap( HBITMAP hbm )
 			}
 		}
 
-		//DDBè½¬DIB
+		//DDB×ªDIB
 		::GetDIBits(DIBHdc, hbm, 0, bmih.biHeight, (char*)lpDIB + nDIBHeadSize, (LPBITMAPINFO)lpDIB, DIB_RGB_COLORS);
 
 		if ( bNeedPalette && hOldPalette )
@@ -575,7 +323,7 @@ HBITMAP TransBitmap( HBITMAP hbm )
 
 		::ReleaseDC(NULL, DIBHdc);
 
-		//DIBè½¬æ¢æˆDDB
+		//DIB×ª»»³ÉDDB
 		BITMAPINFO pbmi = {0};
 		pbmi.bmiHeader.biSize = 40;
 		pbmi.bmiHeader.biWidth = bm.bmWidth;
@@ -593,13 +341,42 @@ HBITMAP TransBitmap( HBITMAP hbm )
 		return NULL;
 }
 
+void TestBitMap( HWND hWnd )
+{
+	HDC hdc = ::GetDC(hWnd);
+	HDC hMemDC = ::CreateCompatibleDC(hdc);
+	HBITMAP hMemBmp = ::CreateCompatibleBitmap(hdc, 200, 20);
+	::ReleaseDC(hWnd, hdc);
+	HBITMAP hBmpBak = (HBITMAP)::SelectObject(hMemDC, hMemBmp);
+	::SetBkMode(hMemDC, TRANSPARENT);
+	HBRUSH hBrush = ::CreateSolidBrush(RGB(0,255,25));
+	RECT text_rc = {0,0,200,20};
+	::FillRect(hMemDC, &text_rc, hBrush);
+	::SetTextColor(hMemDC, RGB(255, 2, 40));
+	::DrawText(hMemDC, L"hello cswuyg 2013-4-14", -1, &text_rc, DT_LEFT | DT_NOCLIP | DT_NOPREFIX);
+	::SelectObject(hMemDC, hBmpBak);
+	HBITMAP hCopy_1 = TransBitmap(hMemBmp);
+	::DeleteObject(hMemBmp);
+	::DeleteDC(hMemDC);
+	SaveBitmapToFile(hCopy_1, L"C:\\copy_1.bmp");
+	HBITMAP h_Copy_bit = (HBITMAP)DDBToDIB(hCopy_1, BI_RGB, NULL);
+	::DeleteObject(hCopy_1);
+	HBITMAP hCopy_2 = DIBToDDB(h_Copy_bit);
+	delete [] h_Copy_bit;
+	SaveBitmapToFile_2(hCopy_2, L"C:\\copy_2.bmp");
+	::DeleteObject(hCopy_2);
+
+
+	//::StretchBlt(hMemDC,text_rc.left, text_rc.top, 100, 20, hdc, text_rc.left, text_rc.top, 100, 20,SRCPAINT);
+	//HBITMAP hxx = (HBITMAP)::LoadImage(NULL, L"c:\\temp.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+}
 
 void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName )
 {
-	HANDLE hBIT =  DDBToDIB(hBitmap, BI_RGB , NULL); //è¿™ä¸ªè¿”å›å€¼å…¶å®æ˜¯newå‡ºæ¥çš„æ•°æ®ï¼Œåé¢å¿…é¡»delete
+	HANDLE hBIT =  DDBToDIB(hBitmap, BI_RGB , NULL); //Õâ¸ö·µ»ØÖµÆäÊµÊÇnew³öÀ´µÄÊı¾İ£¬ºóÃæ±ØĞëdelete
 	LPBITMAPINFO lpBitInfo = (LPBITMAPINFO)hBIT;
 
-	DWORD dwPaletteSize = 0;  //è°ƒè‰²æ¿çš„é¢œè‰²æ•°é‡ï¼Œä¹Ÿå°±æ˜¯RGBQUADç»“æ„ä½“çš„ä¸ªæ•°
+	DWORD dwPaletteSize = 0;  //µ÷É«°åµÄÑÕÉ«ÊıÁ¿£¬Ò²¾ÍÊÇRGBQUAD½á¹¹ÌåµÄ¸öÊı
 	if (lpBitInfo->bmiHeader.biBitCount <= 8)
 	{
 		if (lpBitInfo->bmiHeader.biClrUsed == 0)
@@ -613,15 +390,15 @@ void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName )
 	}
 	DWORD  dwImageSize = ( ( lpBitInfo->bmiHeader.biWidth * lpBitInfo->bmiHeader.biBitCount + 31 )& ~31) / 8 * lpBitInfo->bmiHeader.biHeight;
 
-	// è®¾ç½®ä½å›¾æ–‡ä»¶å¤´ 
+	// ÉèÖÃÎ»Í¼ÎÄ¼şÍ· 
 	BITMAPFILEHEADER   bmfHdr; 
 	bmfHdr.bfType = 0x4D42;   // "BM " 
 	bmfHdr.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwImageSize; 
 	bmfHdr.bfReserved1 = 0; 
 	bmfHdr.bfReserved2 = 0; 
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // å†™å…¥ä½å›¾æ–‡ä»¶å¤´ 
+	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // Ğ´ÈëÎ»Í¼ÎÄ¼şÍ· 
 
-	//è¿™é‡Œä½¿ç”¨WriteFileä¹Ÿå¯ä»¥ï¼Œæˆ‘ç”¨CreateFileMappingï¼Œåªæ˜¯ä¸ºäº†æµ‹è¯•å†…å­˜æ˜ å°„æ–‡ä»¶çš„å†™å…¥
+	//ÕâÀïÊ¹ÓÃWriteFileÒ²¿ÉÒÔ£¬ÎÒÓÃCreateFileMapping£¬Ö»ÊÇÎªÁË²âÊÔÄÚ´æÓ³ÉäÎÄ¼şµÄĞ´Èë
 	HANDLE hNewFile = ::CreateFile(lpFileName, GENERIC_WRITE | GENERIC_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL); 
 	if (hNewFile == INVALID_HANDLE_VALUE) 
 		return;
@@ -629,7 +406,7 @@ void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName )
 	HANDLE hFileMap =  ::CreateFileMapping(hNewFile, NULL, PAGE_READWRITE, 0, bmfHdr.bfSize, NULL);
 	LPVOID lpFile = ::MapViewOfFile(hFileMap, FILE_MAP_WRITE, 0, 0, bmfHdr.bfSize);
 
-	//å†™å…¥ä½å›¾æ–‡ä»¶
+	// Ğ´ÈëÎ»Í¼ÎÄ¼şÆäÓàÄÚÈİ 
 	memcpy(lpFile, &bmfHdr, sizeof(BITMAPFILEHEADER));
 	memcpy((char*)((char*)lpFile+sizeof(BITMAPFILEHEADER)), (char*)hBIT, bmfHdr.bfSize-sizeof(BITMAPFILEHEADER));
 	UnmapViewOfFile(lpFile);
@@ -637,6 +414,4 @@ void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName )
 	CloseHandle(hNewFile);
 	delete [] lpBitInfo;
 }
-}
 
-}
