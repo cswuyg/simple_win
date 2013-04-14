@@ -1,0 +1,79 @@
+//该函数的内部做的是：把DDB转DIB，然后又把DIB转DDB，把新DDB位图句柄返回
+//该函数的目的在于拷贝位图句柄!!!
+HBITMAP CVideoHintDlg::TransBitmap( HBITMAP hbm )
+{
+	HDC hDCA = CreateDC( L"DISPLAY", 0, 0, 0 );
+	int nBitsColor = GetDeviceCaps( hDCA, BITSPIXEL );
+	int nBitCount = nBitsColor * GetDeviceCaps( hDCA, PLANES ); //每个像素的bit
+	DeleteDC(hDCA);
+
+	BITMAP bm;
+	GetObject( hbm, sizeof(BITMAP), &bm );
+	//填充 BITMAP头
+	BITMAPINFOHEADER bmih = {0};
+	bmih.biSize = sizeof(BITMAPINFOHEADER);
+	bmih.biBitCount = (WORD)nBitCount;
+	bmih.biWidth = bm.bmWidth;
+	bmih.biHeight = bm.bmHeight;
+	bmih.biPlanes = 1;
+
+	int nColors = 0;
+	if (bmih.biBitCount <= 8)
+	{
+		nColors = bmih.biClrUsed ? bmih.biClrUsed : 1 << bmih.biBitCount;
+	}
+
+	int nDIBHeadSize = sizeof(BITMAPINFOHEADER) + nColors * sizeof(RGBQUAD);
+	int nbitSize = ((bm.bmWidth * nBitCount + 31) & ~31) / 8 * bmih.biHeight + nDIBHeadSize;   // bi.biSizeImage是DWORD的倍数
+
+	LPVOID lpDIB = new(std::nothrow) byte[nbitSize];  
+	if (lpDIB != NULL)
+	{
+		RtlZeroMemory(lpDIB, nbitSize);
+		memcpy( lpDIB, &bmih, sizeof(BITMAPINFOHEADER) );
+		//设置调色板，大于256色的DIB图是没有调色板的
+		HDC DIBHdc = ::GetDC( NULL );
+		BOOL  bNeedPalette = false;
+		if( nColors != 0 && ::GetDeviceCaps(  DIBHdc, RASTERCAPS ) & RC_PALETTE)
+			bNeedPalette = true;
+		HPALETTE hOldPalette = NULL;
+		if (bNeedPalette)
+		{
+			HPALETTE hPalette = (HPALETTE )::GetStockObject( DEFAULT_PALETTE );
+			if ( hPalette )
+			{
+				hOldPalette = SelectPalette( DIBHdc, hPalette, false );
+				RealizePalette( DIBHdc );
+			}
+		}
+
+		//DDB转DIB
+		GetDIBits( DIBHdc, hbm, 0, bmih.biHeight, (char*)lpDIB + nDIBHeadSize, (LPBITMAPINFO)lpDIB, DIB_RGB_COLORS );
+
+		if ( bNeedPalette && hOldPalette )
+		{
+			SelectPalette( DIBHdc, hOldPalette, true );
+			RealizePalette( DIBHdc) ;
+		}
+
+		::ReleaseDC( NULL, DIBHdc );
+
+		//DIB转换成DDB
+		BITMAPINFO pbmi = {0};
+		pbmi.bmiHeader.biSize = 40;
+		pbmi.bmiHeader.biWidth = bm.bmWidth;
+		pbmi.bmiHeader.biHeight = bm.bmHeight;
+		pbmi.bmiHeader.biPlanes = 1;
+		pbmi.bmiHeader.biBitCount = (WORD)nBitCount;
+
+		HDC hdc = ::GetDC( NULL );
+		HBITMAP hbmp = CreateDIBitmap( hdc ,&bmih, CBM_INIT, (char*)lpDIB + nDIBHeadSize, &pbmi, DIB_RGB_COLORS );
+		delete[] lpDIB;
+		ReleaseDC( hdc );
+		return hbmp;
+	}
+	else
+		return NULL;
+
+}
+

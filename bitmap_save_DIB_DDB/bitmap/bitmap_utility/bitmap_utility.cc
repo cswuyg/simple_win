@@ -9,7 +9,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	HDC hTempDC = ::CreateDC(L"DISPLAY", NULL, NULL, NULL); 
 	int iBits = ::GetDeviceCaps(hTempDC, BITSPIXEL) * ::GetDeviceCaps(hTempDC, PLANES); //当前显示分辨率下每个像素所占字节数 
 	::DeleteDC(hTempDC); 
-
+	//iBits = 1; //将其改为1，可以实现黑白位图
 	WORD wBitCount = 0; //位图中每个像素所占位数
 	if (iBits <= 1) 
 		wBitCount = 1; 
@@ -349,7 +349,7 @@ void TestBitMap( HWND hWnd )
 	::ReleaseDC(hWnd, hdc);
 	HBITMAP hBmpBak = (HBITMAP)::SelectObject(hMemDC, hMemBmp);
 	::SetBkMode(hMemDC, TRANSPARENT);
-	HBRUSH hBrush = ::CreateSolidBrush(RGB(0,255,25));
+	HBRUSH hBrush = ::CreateSolidBrush(RGB(255,255,25));
 	RECT text_rc = {0,0,200,20};
 	::FillRect(hMemDC, &text_rc, hBrush);
 	::SetTextColor(hMemDC, RGB(255, 2, 40));

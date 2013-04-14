@@ -261,7 +261,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	HDC hTempDC = ::CreateDC(L"DISPLAY", NULL, NULL, NULL); 
 	int iBits = ::GetDeviceCaps(hTempDC, BITSPIXEL) * ::GetDeviceCaps(hTempDC, PLANES); //当前显示分辨率下每个像素所占字节数 
 	::DeleteDC(hTempDC); 
-
+	//iBits = 1; //将其改为1，可以实现黑白位图
 	WORD wBitCount = 0; //位图中每个像素所占位数
 	if (iBits <= 1) 
 		wBitCount = 1; 
