@@ -22,3 +22,16 @@
 之所以看代码，是因为对大部分的API都不熟悉。
 如果对API熟悉了，那么找bug就应该以调试为主。
 
+
+----------------------
+2013-4-14 复习时遇到的问题：
+     bmp图片没有保存为有颜色的图像。
+     1、使用CreateCompatibleBitmap函数时，dc使用的是CreateCompatibleDC的返回值，导致BITMAP中的bmBitPixel是1，这就是说用1位保存一个像素点，导致了图片没有颜色，创建Bitmap的时候，应该使用窗口DC，也就是说，创建内存DC和创建内存DC所使用的位图时，都要使用窗口DC。
+
+     BITMAP数据格式。
+     如果是通过CreateDIBSection创建DIB位图句柄->选入MEMDC->拷贝DDB位图到DIB位图->通过DIB位图句柄获取BITMAP数据信息，那么BITMAP的最后一个成员bmBits的值就是位图的数据值。
+
+     位图句柄。
+     一个位图句柄只能被选入DC一次。
+     
+     

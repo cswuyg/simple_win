@@ -1,6 +1,7 @@
 some knowledge about windows program.  
 一些windows编程的知识  
 
+- [位图的文档知识](./bitmap_knowledge)
 - [位图保存、DIB、DDB互转](./bitmap_save_DIB_DDB)
 - [json文本解析的几种库](./cpp_json_parse)
 - [获取所有进程](./get_all_process) 
