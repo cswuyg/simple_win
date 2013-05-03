@@ -1,0 +1,33 @@
+11:32 2011-9-8
+//声明:
+DrawText(
+  hDC: HDC;          {设备句柄}
+  lpString: PChar;   {文本}
+  nCount: Integer;   {要绘制的字符个数; -1 表示全部}
+  var lpRect: TRect; {矩形结构}
+  uFormat: UINT      {选项}
+): Integer;          {返回文本高度}
+
+//uFormat 参数的可选值:
+DT_TOP             = 0;         {顶对齐, 须 or DT_SINGLELINE}
+DT_LEFT            = 0;         {左对齐}
+DT_CENTER          = 1;         {水平居中}
+DT_RIGHT           = 2;         {右对齐}
+DT_VCENTER         = 4;         {垂直居中, 须 or DT_SINGLELINE}
+DT_BOTTOM          = 8;         {底对齐, 须 or DT_SINGLELINE}
+DT_WORDBREAK       = $10;       {给超出边界的单词换行; 如果 SetTextAlign 函数设置了 TA_UPDATECP, 这里的设置无效}
+DT_SINGLELINE      = $20;       {单行文本}
+DT_EXPANDTABS      = $40;       {扩展制表符, 默认制表跨 8 个字符}
+DT_TABSTOP         = $80;       {TAB 后添加的字符数}
+DT_NOCLIP          = $100;      {使文本不限制在指定的矩形内}
+DT_EXTERNALLEADING = $200;      {返回的高度包括字体的外部行距}
+DT_CALCRECT        = $400;      {自动检测容纳文本的矩形的高度和宽度, 并返回高度, 但文本不被绘制}
+DT_NOPREFIX        = $800;      {不处理前缀字符(&); 默认时, & 后的字符会被添加下划线}
+DT_INTERNAL        = $1000;     {用系统字体来计算文本高度}
+DT_HIDEPREFIX      = $00100000; {隐藏下划线}
+DT_PREFIXONLY      = $00200000; {将 & 解释为前缀}
+
+
+
+
+DT_END_ELLIPSIS
