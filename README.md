@@ -14,6 +14,7 @@ some knowledge about windows program.
 - [不依赖消息队列的定时器](./hight_performance_time_calc)
 - [设置线程名称](./set_thread_name)
 - [使用SetWindowRgn实现透明文字](./use_rgn_api_to_transparent)  
+- [获取磁盘信息](./get_disk_space)
 
 
 
