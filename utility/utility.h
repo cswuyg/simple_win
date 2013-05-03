@@ -15,6 +15,7 @@ namespace utility
 	{
 		BOOL WriteToDiskA(const std::wstring& strFilePath, std::string& data);
 		BOOL ReadFromDiskA(const std::wstring& strFilePath, std::string& data);
+		bool DeleteDirectory(const std::wstring& strFolder, bool bDelRootFolder);
 	}
 
 	/**字符串处理相关*/

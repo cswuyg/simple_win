@@ -1,5 +1,7 @@
 #include "utility.h"
 #include <new.h>
+#include <Shlwapi.h>
+#pragma comment( lib, "Shlwapi.lib" )
 
 namespace utility
 {
@@ -68,7 +70,34 @@ BOOL ReadFromDiskA( const std::wstring& strFilePath, std::string& data )
 	}
 	return bRet;
 }
-} //WYGFile
+
+bool DeleteDirectory( const std::wstring& strFolder, bool bDelRootFolder )
+{
+	bool bRet = false;
+	if (::PathIsDirectory(strFolder.c_str()))
+	{
+		wchar_t *pwchPath = new wchar_t[(unsigned int)(strFolder.length()+4)];
+		wcscpy_s(pwchPath, (unsigned int)(strFolder.length()+3), strFolder.c_str());
+		memset(pwchPath+strFolder.length(), 0, 8);
+		if (!bDelRootFolder)
+		{
+			pwchPath[strFolder.length()] = L'\\';
+			pwchPath[strFolder.length()+1] = L'*';
+		}
+		SHFILEOPSTRUCT shfos = {0};
+		shfos.hwnd = NULL;
+		shfos.wFunc = FO_DELETE;
+		shfos.pFrom = pwchPath; 
+		shfos.pTo = NULL;
+		shfos.fFlags = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI;
+		shfos.lpszProgressTitle = NULL;
+		bRet = (::SHFileOperation(&shfos) == 0);
+		delete [] pwchPath;
+	}
+	return bRet;
+}
+
+	} //WYGFile
 
 namespace WYGString
 {
