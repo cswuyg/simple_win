@@ -93,5 +93,9 @@ namespace utility
 		void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName );
 	}
 
+	namespace WYGNet
+	{
+		bool OpenUrlByDefBrowser(const std::wstring& strUrl);
+	}
 
 }

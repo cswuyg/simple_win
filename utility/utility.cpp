@@ -668,4 +668,77 @@ void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName )
 }
 }
 
+namespace WYGNet
+{
+	bool OpenUrlByDefBrowser( const std::wstring& strUrl )
+	{
+		if (strUrl.empty())
+		{
+			return false;
+		}
+		HKEY hRegKey = NULL;
+		if (ERROR_SUCCESS != ::RegOpenKeyExW(HKEY_CLASSES_ROOT, L"http\\shell\\open\\command", 0, KEY_QUERY_VALUE, &hRegKey) || !hRegKey)
+		{
+			if (hRegKey != 0)
+			{
+				::RegCloseKey(hRegKey);
+			}
+			return false;
+		}
+		const int BUFFER_SIZE = 1024;
+		DWORD dwSize = BUFFER_SIZE;
+		wchar_t* buf = new wchar_t[BUFFER_SIZE];
+		if (ERROR_SUCCESS != ::RegQueryValueExW(hRegKey, L"", NULL, NULL, (LPBYTE)buf, &dwSize))
+		{
+			delete [] buf;
+			if (hRegKey != 0)
+			{
+				::RegCloseKey(hRegKey);
+			}
+			return false;	
+		}
+		std::wstring strValue = buf;
+		delete [] buf;
+
+		std::wstring strCommand = ::PathGetArgs(strValue.c_str());
+		std::wstring strBrowserInfo = strValue.substr(0, strValue.size() - strCommand.size());
+		std::wstring::size_type nLeft = strBrowserInfo.find_first_of('\"');
+		std::wstring::size_type nRight = strBrowserInfo.find_last_of('\"');
+		std::wstring strBrowserPath = strBrowserInfo;
+		if (std::wstring::npos != nRight && std::wstring::npos != nLeft && nLeft != nRight)
+		{
+			strBrowserPath = strBrowserInfo.substr(nLeft + 1, nRight - nLeft - 1);
+		}
+		if (!strBrowserPath.empty() && (::PathFileExists(strBrowserPath.c_str()) && !::PathIsDirectory(strBrowserPath.c_str())))
+		{
+			std::wstring strCmdLine = strBrowserPath + L" ";
+			strCmdLine += strUrl;
+			STARTUPINFO stStartupInfo;
+			PROCESS_INFORMATION stProcessInfo;
+			ZeroMemory(&stProcessInfo, sizeof(PROCESS_INFORMATION));
+			ZeroMemory(&stStartupInfo, sizeof(STARTUPINFO));
+			stStartupInfo.cb = sizeof(STARTUPINFO);
+			BOOL bRet = ::CreateProcess(NULL, (LPWSTR)strCmdLine.c_str(), NULL, NULL, NULL, NORMAL_PRIORITY_CLASS, NULL, NULL, &stStartupInfo, &stProcessInfo);
+			if (bRet)
+			{
+				::CloseHandle(stProcessInfo.hProcess);
+				::CloseHandle(stProcessInfo.hThread);
+				return true;
+			}
+			else
+			{
+				//::GetLastError();
+				//log
+			}
+		}
+		HINSTANCE hShellRet = ::ShellExecute(NULL, L"open", L"iexplore", strUrl.c_str(), NULL, SW_SHOW);
+		if (( int )(LONG_PTR)(INT_PTR)hShellRet <= 32)
+		{
+			//log: GetLastError();
+			return false;
+		}
+		return true;
+	}
+}
+
 }
