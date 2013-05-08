@@ -718,6 +718,10 @@ namespace WYGNet
 			ZeroMemory(&stProcessInfo, sizeof(PROCESS_INFORMATION));
 			ZeroMemory(&stStartupInfo, sizeof(STARTUPINFO));
 			stStartupInfo.cb = sizeof(STARTUPINFO);
+			//如果是一个ActiveX插件，运行在浏览器之下
+			//那么WinExec会被firefox浏览器拦截,而且WinExec不支持Unicode
+			//ShellExecute 会被搜狗浏览器拦截
+			//所以最后选择使用CreateProcess
 			BOOL bRet = ::CreateProcess(NULL, (LPWSTR)strCmdLine.c_str(), NULL, NULL, NULL, NORMAL_PRIORITY_CLASS, NULL, NULL, &stStartupInfo, &stProcessInfo);
 			if (bRet)
 			{
@@ -727,14 +731,14 @@ namespace WYGNet
 			}
 			else
 			{
-				//::GetLastError();
-				//log
+				//log： ::GetLastError();
 			}
 		}
+		//意外情况，直接ShellExecute
 		HINSTANCE hShellRet = ::ShellExecute(NULL, L"open", L"iexplore", strUrl.c_str(), NULL, SW_SHOW);
 		if (( int )(LONG_PTR)(INT_PTR)hShellRet <= 32)
 		{
-			//log: GetLastError();
+			//log: ::GetLastError();
 			return false;
 		}
 		return true;

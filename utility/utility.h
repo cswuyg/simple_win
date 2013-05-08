@@ -95,6 +95,9 @@ namespace utility
 
 	namespace WYGNet
 	{
+		/**
+		如果Default Browser存在则使用它打开url，否则使用ie
+		*/
 		bool OpenUrlByDefBrowser(const std::wstring& strUrl);
 	}
 
