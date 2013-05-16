@@ -15,8 +15,8 @@ some knowledge about windows program.
 - [设置线程名称](./set_thread_name)
 - [使用SetWindowRgn实现透明文字](./use_rgn_api_to_transparent)  
 - [获取磁盘信息](./get_disk_space)
-- [让文字有包边](./word_shadow)
-- [封装后的多媒体定时器]（./multi_media_timer_test）
+- [让文字有包边](./word_shadow)  
+- [封装后的多媒体定时器](./multi_media_timer_test) 
 
 
 
