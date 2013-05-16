@@ -56,7 +56,7 @@ BOOL ReadFromDiskA( const std::wstring& strFilePath, std::string& data )
 			delete [] buf;
 			break;
 		}
-		data = buf;
+		data = std::string(buf, nCount);
 		delete [] buf;
 
 		::CloseHandle(hFile);
@@ -718,6 +718,7 @@ namespace WYGNet
 			ZeroMemory(&stProcessInfo, sizeof(PROCESS_INFORMATION));
 			ZeroMemory(&stStartupInfo, sizeof(STARTUPINFO));
 			stStartupInfo.cb = sizeof(STARTUPINFO);
+			//其实最简单的只需要：::ShellExecute(NULL, _T("open"), _T("http://..."), NULL, NULL, SW_SHOWNORMAL);但是
 			//如果是一个ActiveX插件，运行在浏览器之下
 			//那么WinExec会被firefox浏览器拦截,而且WinExec不支持Unicode
 			//ShellExecute 会被搜狗浏览器拦截

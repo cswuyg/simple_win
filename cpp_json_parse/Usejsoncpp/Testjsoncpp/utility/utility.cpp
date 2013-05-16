@@ -49,7 +49,7 @@ BOOL ReadFromDiskA( const std::wstring& strFilePath, std::string& data )
 			delete [] buf;
 			break;
 		}
-		data = buf;
+		data = std::string(buf, nCount);
 		delete [] buf;
 
 		::CloseHandle(hFile);

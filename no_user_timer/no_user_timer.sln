@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MMTimer", "MMTimer\MMTimer.vcproj", "{FAE65980-CDF9-4334-980E-BDE0A18EAB50}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateTimerQueue", "CreateTimerQueue\CreateTimerQueue.vcproj", "{69F47B74-8B2B-4F01-AA06-924C3AA76B04}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateWaitableTimer", "CreateWaitableTimer\CreateWaitableTimer.vcproj", "{947BB58A-217D-4819-A8A8-F155E331980F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FAE65980-CDF9-4334-980E-BDE0A18EAB50}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FAE65980-CDF9-4334-980E-BDE0A18EAB50}.Debug|Win32.Build.0 = Debug|Win32
+		{FAE65980-CDF9-4334-980E-BDE0A18EAB50}.Release|Win32.ActiveCfg = Release|Win32
+		{FAE65980-CDF9-4334-980E-BDE0A18EAB50}.Release|Win32.Build.0 = Release|Win32
+		{69F47B74-8B2B-4F01-AA06-924C3AA76B04}.Debug|Win32.ActiveCfg = Debug|Win32
+		{69F47B74-8B2B-4F01-AA06-924C3AA76B04}.Debug|Win32.Build.0 = Debug|Win32
+		{69F47B74-8B2B-4F01-AA06-924C3AA76B04}.Release|Win32.ActiveCfg = Release|Win32
+		{69F47B74-8B2B-4F01-AA06-924C3AA76B04}.Release|Win32.Build.0 = Release|Win32
+		{947BB58A-217D-4819-A8A8-F155E331980F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{947BB58A-217D-4819-A8A8-F155E331980F}.Debug|Win32.Build.0 = Debug|Win32
+		{947BB58A-217D-4819-A8A8-F155E331980F}.Release|Win32.ActiveCfg = Release|Win32
+		{947BB58A-217D-4819-A8A8-F155E331980F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
