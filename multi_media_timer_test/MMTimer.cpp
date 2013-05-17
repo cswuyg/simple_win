@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "MMTimer.h"
-//#include "comm_func.h"
 
 #include <assert.h>
 
@@ -77,7 +76,6 @@ int CMMTimer::SetTimer(ITimerCallBack* pCallback, UINT nUserTimerID, DWORD uElap
 	MMRESULT timeID = ::timeSetEvent(uElapse, 0, (LPTIMECALLBACK)HighTimerCallBack, (DWORD_PTR)this, fuEvent);
 	if (timeID == NULL)
 	{
-		//COMM_FUNC::DPrint(L"<Install_UI>timeSetEvent Error");
 		return 0;
 	}
 
