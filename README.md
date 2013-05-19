@@ -4,6 +4,7 @@ some knowledge about windows program.
 - [位图的文档知识](./bitmap_knowledge)
 - [位图保存、DIB、DDB互转](./bitmap_save_DIB_DDB)
 - [json文本解析的几种库](./cpp_json_parse)
+- [xml文本解析库](./cpp_xml_parse) 
 - [获取所有进程](./get_all_process) 
 - [获取如%APPDATA%之类的系统目录路径](./get_appdata) 
 - [文件时间、系统时间](./get_file_time)
@@ -17,6 +18,7 @@ some knowledge about windows program.
 - [获取磁盘信息](./get_disk_space)
 - [让文字有包边](./word_shadow)  
 - [封装后的多媒体定时器](./multi_media_timer_test) 
+
 
 
 
