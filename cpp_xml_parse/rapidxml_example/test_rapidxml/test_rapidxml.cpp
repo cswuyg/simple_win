@@ -10,6 +10,9 @@ rapidxml是极好的一个xml解析库
 
 2012-12-14
 cswuyg@gmail.com
+
+注意，分析出DOM结构之后，再使用rapidxml::xml_document<>对象写入文件，xml的标识头会丢失，需要自己用insert_node再加上去
+http://blog.csdn.net/wqvbjhc/article/details/7662931
 */
 
 

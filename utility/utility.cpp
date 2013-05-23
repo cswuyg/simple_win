@@ -1,6 +1,8 @@
 #include "utility.h"
 #include <new.h>
 #include <Shlwapi.h>
+#include <ShlObj.h>
+#pragma comment(lib, "Shell32.lib")
 #pragma comment( lib, "Shlwapi.lib" )
 
 namespace utility
@@ -94,6 +96,224 @@ bool DeleteDirectory( const std::wstring& strFolder, bool bDelRootFolder )
 		bRet = (::SHFileOperation(&shfos) == 0);
 		delete [] pwchPath;
 	}
+	return bRet;
+}
+
+
+bool IsDiskCanWrite(const std::wstring& strDisk)
+{
+	std::wstring strTestDir = strDisk + L":\\cswuyg4822FBB5";
+	std::wstring strTestFile = strTestDir + L"\\cswuyg4822FBB5.txt";
+	::DeleteFile(strTestFile.c_str());
+	::RemoveDirectory(strTestDir.c_str());
+
+	bool bCanWrite = false;
+	if(::SHCreateDirectoryEx(NULL, (strTestDir + L"\\").c_str(), NULL) == ERROR_SUCCESS)
+	{
+		HANDLE hFile = ::CreateFile(strTestFile.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (hFile != INVALID_HANDLE_VALUE)
+		{
+			::SetFilePointer(hFile, NULL, NULL, FILE_BEGIN);
+			DWORD dwBytes = 0;
+			if (::WriteFile(hFile, L"test_write", 10, &dwBytes, NULL) != 0)
+			{
+				bCanWrite = true;
+			}
+			::CloseHandle(hFile);
+			::DeleteFile(strTestFile.c_str());
+		}
+		DeleteDirectory(strTestDir, true); 
+	}
+	return bCanWrite;
+}
+
+//�ο���http://blog.csdn.net/handsomerun/article/details/1156815
+wchar_t GetMaxFreeCanWriteDiskID(ULONGLONG& FreeSpace)
+{
+	DWORD dwMaskdriver = ::GetLogicalDrives();
+	if(dwMaskdriver == 0)
+	{
+		return L'\0';
+	}
+	wchar_t	szDriver[ 4 ] = L"A:\\";
+	wchar_t wchDriverID = L'\0';
+	for(int i = 0; i < 26; ++i)
+	{
+		if(0 == (dwMaskdriver >> i))
+		{
+			break;
+		}
+		if((dwMaskdriver >> i) & 1)
+		{
+			szDriver[0]= (wchar_t)(i + L'A');
+			DWORD dwDriverType = ::GetDriveType(szDriver);
+			if(DRIVE_FIXED != dwDriverType)
+			{
+				continue;
+			}
+			ULONGLONG ullTotalSpace;
+			ULONGLONG ullFreeSpace;
+			ULONGLONG ullFreeByte;
+			if(0 == GetDiskFreeSpaceEx(szDriver, (PULARGE_INTEGER)&ullFreeByte, (PULARGE_INTEGER)&ullTotalSpace, (PULARGE_INTEGER)&ullFreeSpace))
+			{
+				continue;
+			}
+			wchar_t szDir[4] = L"";
+			szDir[0] = szDriver[0];
+			std::wstring strDisk = szDir;
+			if (!IsDiskCanWrite(strDisk))
+			{
+				continue;
+			}
+			if (FreeSpace == 0)
+			{
+				FreeSpace = ullFreeSpace;
+				wchDriverID = szDriver[0];
+				continue;
+			}
+			if (FreeSpace < ullFreeSpace)
+			{
+				wchar_t wchBuf[16] = L"\\\\?\\a:";
+				wchBuf[4] = szDriver[0];
+				HANDLE hDevice = ::CreateFile(wchBuf, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+				if (hDevice != INVALID_HANDLE_VALUE)
+				{
+					PSTORAGE_DEVICE_DESCRIPTOR pDevDesc;
+					pDevDesc = (PSTORAGE_DEVICE_DESCRIPTOR)new BYTE[sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1];
+					pDevDesc->Size = sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1;
+					STORAGE_PROPERTY_QUERY	Query;
+					Query.PropertyId = StorageDeviceProperty;
+					Query.QueryType = PropertyStandardQuery;
+					DWORD dwOutBytes;
+					BOOL bResult = ::DeviceIoControl(hDevice, IOCTL_STORAGE_QUERY_PROPERTY, &Query, sizeof(STORAGE_PROPERTY_QUERY), pDevDesc, pDevDesc->Size, &dwOutBytes, (LPOVERLAPPED)NULL);
+					if(bResult)
+					{
+						if(BusTypeUsb == pDevDesc->BusType)
+						{
+							delete[] pDevDesc;
+							::CloseHandle(hDevice);
+							continue;
+						}
+					}
+					delete[] pDevDesc;
+					::CloseHandle(hDevice);
+				}
+				FreeSpace = ullFreeSpace;
+				wchDriverID = szDriver[ 0 ];
+			}
+		}
+	}
+	return wchDriverID;
+}
+
+unsigned int GetPathFreeSpace(const std::wstring& strPath)
+{
+	int nDriverNum = PathGetDriveNumber(strPath.c_str());
+	wchar_t	szDriver[4] = L"A:\\";
+	szDriver[0] = (wchar_t)(nDriverNum + L'A');
+	if (!::GetVolumeInformation(szDriver, 0, 0, NULL,NULL, 0, NULL, 0)) 
+	{
+		return 0;
+	}
+	ULARGE_INTEGER freeAv;
+	ULARGE_INTEGER totalBytes;
+	ULARGE_INTEGER freeBytes;
+	if (!::GetDiskFreeSpaceEx(szDriver, &freeAv, &totalBytes, &freeBytes))
+	{
+		return 0;
+	}
+	float nTotal = (float)((float)totalBytes.QuadPart / (ULONGLONG)(1024*1024));
+	float nFree = (float)((float)freeBytes.QuadPart / (ULONGLONG)(1024*1024));
+	return (unsigned long)nFree;
+}
+
+unsigned long GetFileSize( std::wstring& strFilePath )
+{
+	HANDLE hFile = ::CreateFile(strFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		return 0;
+	}
+	unsigned long nCount = ::GetFileSize(hFile, NULL);
+	::CloseHandle(hFile);
+	return nCount;
+}
+#define MAX_FILE_RENAME_NUMBER 100
+bool RenameAndDelTempFile( std::wstring& strDest, const std::wstring& strSource )
+{
+	if (!::PathFileExists(strSource.c_str()))
+	{
+		strDest = strSource;
+		return true;
+	}
+	bool bRet = true;
+	wchar_t szPath[MAX_PATH] = {0};
+	wcscpy_s(szPath, MAX_PATH, strSource.c_str());
+	wchar_t* szExtension = ::PathFindExtension(szPath);
+	std::wstring strPath = strSource.substr(0, strSource.length() - (int)wcslen(szExtension));
+	int i = 1;
+	std::wstring strPathFind = strSource;
+	do 
+	{
+		BOOL bDel = FALSE;
+		if (GetFileSize(strPathFind) == 0)
+		{
+			bDel = ::DeleteFile(strPathFind.c_str());
+		}
+		if (bDel)
+		{
+			strDest = strPathFind;
+			break;
+		}
+		wchar_t szbuf[MAX_PATH];
+		::_snwprintf_s(szbuf, _countof(szbuf), MAX_PATH-1, L"%s(%d)%s", strPath.c_str(), i, szExtension);
+		strPathFind = szbuf;
+		if (++i > MAX_FILE_RENAME_NUMBER)
+		{
+			strPathFind = L"";
+			bRet = false;
+			break;
+		}
+	} while (::PathFileExists(strPathFind.c_str()));
+
+	strDest = strPathFind;
+	return bRet;
+}
+
+bool RenameAndDelFile( std::wstring& strDest, const std::wstring& strSource )
+{
+	if (!::PathFileExists(strSource.c_str()))
+	{
+		strDest = strSource;
+		return true;
+	}
+	bool bRet = true;
+	wchar_t szPath[MAX_PATH] = {0};
+	wcscpy_s(szPath, MAX_PATH, strSource.c_str());
+	wchar_t* szExtension = ::PathFindExtension(szPath);
+	std::wstring strPath = strSource.substr(0, strSource.length() - (int)wcslen(szExtension));
+	int i = 1;
+	std::wstring strPathFind = strSource;
+	do 
+	{
+		BOOL bDel = ::DeleteFile(strPathFind.c_str());
+		if (bDel)
+		{
+			strDest = strPathFind;
+			break;
+		}
+		wchar_t szbuf[MAX_PATH];
+		::_snwprintf_s(szbuf, _countof(szbuf), MAX_PATH-1, L"%s(%d)%s", strPath.c_str(), i, szExtension);
+		strPathFind = szbuf;
+		if (++i > MAX_FILE_RENAME_NUMBER)
+		{
+			strPathFind = L"";
+			bRet = false;
+			break;
+		}
+	} while (::PathFileExists(strPathFind.c_str()));
+
+	strDest = strPathFind;
 	return bRet;
 }
 
@@ -285,13 +505,13 @@ namespace WYGBmp
 {
 int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 {
-	BITMAP       Bitmap; //位图属性结构 
+	BITMAP       Bitmap; //位图属性结�?
 	//计算位图文件每个像素所占字节数 
 	HDC hTempDC = ::CreateDC(L"DISPLAY", NULL, NULL, NULL); 
 	int iBits = ::GetDeviceCaps(hTempDC, BITSPIXEL) * ::GetDeviceCaps(hTempDC, PLANES); //当前显示分辨率下每个像素所占字节数 
 	::DeleteDC(hTempDC); 
-	//iBits = 1; //将其改为1，可以实现黑白位图
-	WORD wBitCount = 0; //位图中每个像素所占位数
+	//iBits = 1; //将其改为1，可以实现黑白位�?
+	WORD wBitCount = 0; //位图中每个像素所占位�?
 	if (iBits <= 1) 
 		wBitCount = 1; 
 	else if (iBits <= 4) 
@@ -303,8 +523,8 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	else if (iBits <= 32)
 		wBitCount = 32;
 
-	//计算调色板所占空间
-	//如果一个像素所占空间小于等于8位，则使用调色板，否则直接存储RGB值
+	//计算调色板所占空�?
+	//如果一个像素所占空间小于等�?位，则使用调色板，否则直接存储RGB�?
 	DWORD dwPaletteSize=0;
 	if (wBitCount <= 8) 
 	{
@@ -314,13 +534,13 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	 DWORD dwDIBSize, dwWritten; 
 	//获取DDB位图信息，然后设置文件位图信息头结构 
 	::GetObject(hDDBmap, sizeof(BITMAP), (LPSTR)&Bitmap); 
-	BITMAPINFOHEADER bi; //位图信息头结构 
+	BITMAPINFOHEADER bi; //位图信息头结�?
 	::memset(&bi, 0, sizeof(BITMAPINFOHEADER));
 	bi.biSize = sizeof(BITMAPINFOHEADER); 
 	bi.biWidth = Bitmap.bmWidth; 
 	bi.biHeight = Bitmap.bmHeight; 
 	bi.biPlanes = 1; 
-	bi.biBitCount = wBitCount;  //一个像素点占用的位数
+	bi.biBitCount = wBitCount;  //一个像素点占用的位�?
 	bi.biCompression = BI_RGB; 
 	//bi.biSizeImage = 0; 
 	//bi.biXPelsPerMeter = 0; 
@@ -328,11 +548,11 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	//bi.biClrUsed = 0; 
 	//bi.biClrImportant = 0; 
 	
-	DWORD dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;   //向上取整，计字节数
-	//为位图内容分配内存 
-	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //位图信息头结构 
+	DWORD dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;   //向上取整，计字节�?
+	//为位图内容分配内�?
+	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //位图信息头结�?
 	*lpbi = bi; 
-	// 处理调色板   
+	// 处理调色�?  
 	HANDLE hOldPal = NULL;
 	HDC hDCPalatte = NULL;
 	HANDLE hPal = ::GetStockObject(DEFAULT_PALETTE); 
@@ -342,9 +562,9 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		hOldPal = ::SelectPalette(hDCPalatte, (HPALETTE)hPal, FALSE); 
 		::RealizePalette(hDCPalatte); 
 	} 
-	// 获取该调色板下新的像素值 
+	// 获取该调色板下新的像素�?
 	::GetDIBits(hDCPalatte, hDDBmap, 0, (UINT) Bitmap.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO) lpbi, DIB_RGB_COLORS); 
-	//恢复调色板   
+	//恢复调色�?  
 	if (hOldPal) 
 	{ 
 		::SelectPalette(hDCPalatte, (HPALETTE)hOldPal, TRUE); 
@@ -361,17 +581,17 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		delete [] lpbi;
 		return -1; 
 	}
-	//设置位图文件头
-	BITMAPFILEHEADER bmfHdr; //位图文件头结构 
+	//设置位图文件�?
+	BITMAPFILEHEADER bmfHdr; //位图文件头结�?
 	::memset(&bmfHdr, 0, sizeof(BITMAPFILEHEADER));
 	bmfHdr.bfType = 0x4D42;   // "BM " 
-	//位图文件大小：位图文件头 +　位图信息头 + 调色板空间 + 位图真实数据空间
+	//位图文件大小：位图文件头 +　位图信息�?+ 调色板空�?+ 位图真实数据空间
 	dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;   
 	bmfHdr.bfSize = dwDIBSize; 
 	/*bmfHdr.bfReserved1 = 0; 
 	bmfHdr.bfReserved2 = 0;*/ 
-	//位图真实数据位置：位图文件头 +　位图信息头 + 调色板空间
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件头 
+	//位图真实数据位置：位图文件头 +　位图信息�?+ 调色板空�?
+	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件�?
 
 	::WriteFile(hFile, (LPSTR)&bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL); 
 	// 写入位图文件其余内容 
@@ -488,7 +708,7 @@ HBITMAP DIBToDDB( HANDLE hDIB )
 
 	lpbi = (LPBITMAPINFOHEADER)hDIB;
 	int nColors = 0;
-	//每个像素用小于等于8位表示时，才有调色板
+	//每个像素用小于等�?位表示时，才有调色板
 	if ( lpbi->biBitCount <= 8)
 	{
 		nColors = lpbi->biClrUsed ? lpbi->biClrUsed : 1 << lpbi->biBitCount;
@@ -555,7 +775,7 @@ HBITMAP TransBitmap( HBITMAP hbm )
 
 	BITMAP bm;
 	::GetObject(hbm, sizeof(BITMAP), &bm);
-	//填充 BITMAP头
+	//填充 BITMAP�?
 	BITMAPINFOHEADER bmih = {0};
 	bmih.biSize = sizeof(BITMAPINFOHEADER);
 	bmih.biBitCount = (WORD)nBitCount;
@@ -642,13 +862,13 @@ void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName )
 	}
 	DWORD  dwImageSize = ( ( lpBitInfo->bmiHeader.biWidth * lpBitInfo->bmiHeader.biBitCount + 31 )& ~31) / 8 * lpBitInfo->bmiHeader.biHeight;
 
-	// 设置位图文件头 
+	// 设置位图文件�?
 	BITMAPFILEHEADER   bmfHdr; 
 	bmfHdr.bfType = 0x4D42;   // "BM " 
 	bmfHdr.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwImageSize; 
 	bmfHdr.bfReserved1 = 0; 
 	bmfHdr.bfReserved2 = 0; 
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件头 
+	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件�?
 
 	//这里使用WriteFile也可以，我用CreateFileMapping，只是为了测试内存映射文件的写入
 	HANDLE hNewFile = ::CreateFile(lpFileName, GENERIC_WRITE | GENERIC_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL); 
@@ -719,9 +939,9 @@ namespace WYGNet
 			ZeroMemory(&stStartupInfo, sizeof(STARTUPINFO));
 			stStartupInfo.cb = sizeof(STARTUPINFO);
 			//其实最简单的只需要：::ShellExecute(NULL, _T("open"), _T("http://..."), NULL, NULL, SW_SHOWNORMAL);但是
-			//如果是一个ActiveX插件，运行在浏览器之下
-			//那么WinExec会被firefox浏览器拦截,而且WinExec不支持Unicode
-			//ShellExecute 会被搜狗浏览器拦截
+			//如果是一个ActiveX插件，运行在浏览器之�?
+			//那么WinExec会被firefox浏览器拦�?而且WinExec不支持Unicode
+			//ShellExecute 会被搜狗浏览器拦�?
 			//所以最后选择使用CreateProcess
 			BOOL bRet = ::CreateProcess(NULL, (LPWSTR)strCmdLine.c_str(), NULL, NULL, NULL, NORMAL_PRIORITY_CLASS, NULL, NULL, &stStartupInfo, &stProcessInfo);
 			if (bRet)
@@ -732,7 +952,7 @@ namespace WYGNet
 			}
 			else
 			{
-				//log： ::GetLastError();
+				//log�?::GetLastError();
 			}
 		}
 		//意外情况，直接ShellExecute

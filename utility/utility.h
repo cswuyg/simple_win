@@ -15,7 +15,12 @@ namespace utility
 	{
 		BOOL WriteToDiskA(const std::wstring& strFilePath, std::string& data);
 		BOOL ReadFromDiskA(const std::wstring& strFilePath, std::string& data);
-		bool DeleteDirectory(const std::wstring& strFolder, bool bDelRootFolder);
+		bool DeleteDirectory(const std::wstring& strFolder, bool bDelRootFolder);	
+		wchar_t GetMaxFreeCanWriteDiskID(ULONGLONG& freeSpace);    //获取可写的固定磁盘且有最大磁盘空间的盘符
+		unsigned int GetPathFreeSpace(const std::wstring& strPath); //获取路径下的空余空间
+		unsigned long GetFileSize(std::wstring& strFilePath);
+		bool RenameAndDelTempFile(std::wstring& strDest, const std::wstring& strSource); //遇到空文件则删除，其他情况(非空文件、删除失败)则重命名..(重命名之后递归)
+		bool RenameAndDelFile(std::wstring& strDest, const std::wstring& strSource);//文件存在则删除，删除失败则重命名，重命名之后还存在则删除，删除失败.则...（递归）
 	}
 
 	/**字符串处理相关*/
@@ -92,7 +97,8 @@ namespace utility
 		*/
 		void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName );
 	}
-
+	
+	
 	namespace WYGNet
 	{
 		/**
