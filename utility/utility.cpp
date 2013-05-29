@@ -317,6 +317,18 @@ bool RenameAndDelFile( std::wstring& strDest, const std::wstring& strSource )
 	return bRet;
 }
 
+bool OpenPathAndSelectFile( const std::wstring& strPath )
+{
+	bool bRet = false;
+	if (::PathFileExists(strPath.c_str()) && !::PathIsDirectory(strPath.c_str()))
+	{
+		std::wstring strCmd = L"/n,/select," + strPath;
+		::ShellExecute(NULL, L"open", L"Explorer.exe", strCmd.c_str(), NULL, SW_SHOW);
+		bRet = true;
+	}
+	return bRet;
+}
+
 	} //WYGFile
 
 namespace WYGString

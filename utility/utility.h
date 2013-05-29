@@ -10,17 +10,26 @@ cswuyg@gmail.com
 
 namespace utility
 {
-	/**读写文件相关*/
+	/**文件相关*/
 	namespace WYGFile
 	{
+		//读取文件 
 		BOOL WriteToDiskA(const std::wstring& strFilePath, std::string& data);
+		//读取文件
 		BOOL ReadFromDiskA(const std::wstring& strFilePath, std::string& data);
 		bool DeleteDirectory(const std::wstring& strFolder, bool bDelRootFolder);	
-		wchar_t GetMaxFreeCanWriteDiskID(ULONGLONG& freeSpace);    //获取可写的固定磁盘且有最大磁盘空间的盘符
-		unsigned int GetPathFreeSpace(const std::wstring& strPath); //获取路径下的空余空间
+		//获取可写的固定磁盘且有最大磁盘空间的盘符
+		wchar_t GetMaxFreeCanWriteDiskID(ULONGLONG& freeSpace);    
+		//获取路径下的空余空间
+		unsigned int GetPathFreeSpace(const std::wstring& strPath); 
+		//获取文件大小
 		unsigned long GetFileSize(std::wstring& strFilePath);
-		bool RenameAndDelTempFile(std::wstring& strDest, const std::wstring& strSource); //遇到空文件则删除，其他情况(非空文件、删除失败)则重命名..(重命名之后递归)
-		bool RenameAndDelFile(std::wstring& strDest, const std::wstring& strSource);//文件存在则删除，删除失败则重命名，重命名之后还存在则删除，删除失败.则...（递归）
+		 //遇到空文件则删除，其他情况(非空文件、删除失败)则重命名..(重命名之后递归)
+		bool RenameAndDelTempFile(std::wstring& strDest, const std::wstring& strSource);
+		//文件存在则删除，删除失败则重命名，重命名之后还存在则删除，删除失败.则...（递归）
+		bool RenameAndDelFile(std::wstring& strDest, const std::wstring& strSource);
+		//打开文件所在文件夹并选中文件
+		bool OpenPathAndSelectFile(const std::wstring& strPath);
 	}
 
 	/**字符串处理相关*/
