@@ -3,7 +3,7 @@
 #include <process.h>
 //2013.3.5
 //cswuyg
-//参考 chromium源码:D:\bd_player3\src\base\threading\platform_thread_win.cc
+//参考 chromium源码: src\base\threading\platform_thread_win.cc
 
 // The information on how to set the thread name comes from
 // a MSDN article: http://msdn2.microsoft.com/en-us/library/xcb2z8hs.aspx
