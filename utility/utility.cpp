@@ -1,4 +1,4 @@
-#include "utility.h"
+﻿#include "utility.h"
 #include <new.h>
 #include <Shlwapi.h>
 #include <ShlObj.h>
@@ -127,7 +127,7 @@ bool IsDiskCanWrite(const std::wstring& strDisk)
 	return bCanWrite;
 }
 
-//�ο���http://blog.csdn.net/handsomerun/article/details/1156815
+//ӎ߼úhttp://blog.csdn.net/handsomerun/article/details/1156815
 wchar_t GetMaxFreeCanWriteDiskID(ULONGLONG& FreeSpace)
 {
 	DWORD dwMaskdriver = ::GetLogicalDrives();
@@ -517,13 +517,13 @@ namespace WYGBmp
 {
 int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 {
-	BITMAP       Bitmap; //位图属性结�?
+	BITMAP       Bitmap; 
 	//计算位图文件每个像素所占字节数 
 	HDC hTempDC = ::CreateDC(L"DISPLAY", NULL, NULL, NULL); 
 	int iBits = ::GetDeviceCaps(hTempDC, BITSPIXEL) * ::GetDeviceCaps(hTempDC, PLANES); //当前显示分辨率下每个像素所占字节数 
 	::DeleteDC(hTempDC); 
-	//iBits = 1; //将其改为1，可以实现黑白位�?
-	WORD wBitCount = 0; //位图中每个像素所占位�?
+	//iBits = 1; //将其改为1，可以实现黑白位囿
+	WORD wBitCount = 0; //位图中每个像素所占位
 	if (iBits <= 1) 
 		wBitCount = 1; 
 	else if (iBits <= 4) 
@@ -535,8 +535,8 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	else if (iBits <= 32)
 		wBitCount = 32;
 
-	//计算调色板所占空�?
-	//如果一个像素所占空间小于等�?位，则使用调色板，否则直接存储RGB�?
+	//计算调色板所占空闿
+	//如果一个像素所占空间小于等亿位，则使用调色板，否则直接存储RGB
 	DWORD dwPaletteSize=0;
 	if (wBitCount <= 8) 
 	{
@@ -546,13 +546,13 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	 DWORD dwDIBSize, dwWritten; 
 	//获取DDB位图信息，然后设置文件位图信息头结构 
 	::GetObject(hDDBmap, sizeof(BITMAP), (LPSTR)&Bitmap); 
-	BITMAPINFOHEADER bi; //位图信息头结�?
+	BITMAPINFOHEADER bi; //位图信息夿
 	::memset(&bi, 0, sizeof(BITMAPINFOHEADER));
 	bi.biSize = sizeof(BITMAPINFOHEADER); 
 	bi.biWidth = Bitmap.bmWidth; 
 	bi.biHeight = Bitmap.bmHeight; 
 	bi.biPlanes = 1; 
-	bi.biBitCount = wBitCount;  //一个像素点占用的位�?
+	bi.biBitCount = wBitCount;  //一个像素点占用的位
 	bi.biCompression = BI_RGB; 
 	//bi.biSizeImage = 0; 
 	//bi.biXPelsPerMeter = 0; 
@@ -560,11 +560,11 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	//bi.biClrUsed = 0; 
 	//bi.biClrImportant = 0; 
 	
-	DWORD dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;   //向上取整，计字节�?
-	//为位图内容分配内�?
-	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //位图信息头结�?
+	DWORD dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;   //向上取整
+	//为位图内容分配内孿
+	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //位图信息夿
 	*lpbi = bi; 
-	// 处理调色�?  
+	// 处理调色板
 	HANDLE hOldPal = NULL;
 	HDC hDCPalatte = NULL;
 	HANDLE hPal = ::GetStockObject(DEFAULT_PALETTE); 
@@ -574,9 +574,9 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		hOldPal = ::SelectPalette(hDCPalatte, (HPALETTE)hPal, FALSE); 
 		::RealizePalette(hDCPalatte); 
 	} 
-	// 获取该调色板下新的像素�?
+	// 获取该调色板下新的像紿
 	::GetDIBits(hDCPalatte, hDDBmap, 0, (UINT) Bitmap.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO) lpbi, DIB_RGB_COLORS); 
-	//恢复调色�?  
+	//恢复调色板
 	if (hOldPal) 
 	{ 
 		::SelectPalette(hDCPalatte, (HPALETTE)hOldPal, TRUE); 
@@ -593,17 +593,17 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		delete [] lpbi;
 		return -1; 
 	}
-	//设置位图文件�?
-	BITMAPFILEHEADER bmfHdr; //位图文件头结�?
+	//设置位图文件
+	BITMAPFILEHEADER bmfHdr; //位图文件夿
 	::memset(&bmfHdr, 0, sizeof(BITMAPFILEHEADER));
 	bmfHdr.bfType = 0x4D42;   // "BM " 
-	//位图文件大小：位图文件头 +　位图信息�?+ 调色板空�?+ 位图真实数据空间
+	//位图文件大小：位图文件头 +　位图信头 + 调色板空闿+ 位图真实数据空间
 	dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;   
 	bmfHdr.bfSize = dwDIBSize; 
 	/*bmfHdr.bfReserved1 = 0; 
 	bmfHdr.bfReserved2 = 0;*/ 
-	//位图真实数据位置：位图文件头 +　位图信息�?+ 调色板空�?
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件�?
+	//位图真实数据位置：位图文件头 +　位图信息夿+ 调色板空闿
+	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件
 
 	::WriteFile(hFile, (LPSTR)&bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL); 
 	// 写入位图文件其余内容 
@@ -720,7 +720,7 @@ HBITMAP DIBToDDB( HANDLE hDIB )
 
 	lpbi = (LPBITMAPINFOHEADER)hDIB;
 	int nColors = 0;
-	//每个像素用小于等�?位表示时，才有调色板
+	//每个像素用小于等亿位表示时，才有调色板
 	if ( lpbi->biBitCount <= 8)
 	{
 		nColors = lpbi->biClrUsed ? lpbi->biClrUsed : 1 << lpbi->biBitCount;
@@ -787,7 +787,7 @@ HBITMAP TransBitmap( HBITMAP hbm )
 
 	BITMAP bm;
 	::GetObject(hbm, sizeof(BITMAP), &bm);
-	//填充 BITMAP�?
+	//填充 BITMAP
 	BITMAPINFOHEADER bmih = {0};
 	bmih.biSize = sizeof(BITMAPINFOHEADER);
 	bmih.biBitCount = (WORD)nBitCount;
@@ -874,13 +874,13 @@ void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName )
 	}
 	DWORD  dwImageSize = ( ( lpBitInfo->bmiHeader.biWidth * lpBitInfo->bmiHeader.biBitCount + 31 )& ~31) / 8 * lpBitInfo->bmiHeader.biHeight;
 
-	// 设置位图文件�?
+	// 设置位图文件
 	BITMAPFILEHEADER   bmfHdr; 
 	bmfHdr.bfType = 0x4D42;   // "BM " 
 	bmfHdr.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwImageSize; 
 	bmfHdr.bfReserved1 = 0; 
 	bmfHdr.bfReserved2 = 0; 
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件�?
+	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件
 
 	//这里使用WriteFile也可以，我用CreateFileMapping，只是为了测试内存映射文件的写入
 	HANDLE hNewFile = ::CreateFile(lpFileName, GENERIC_WRITE | GENERIC_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL); 
@@ -951,9 +951,9 @@ namespace WYGNet
 			ZeroMemory(&stStartupInfo, sizeof(STARTUPINFO));
 			stStartupInfo.cb = sizeof(STARTUPINFO);
 			//其实最简单的只需要：::ShellExecute(NULL, _T("open"), _T("http://..."), NULL, NULL, SW_SHOWNORMAL);但是
-			//如果是一个ActiveX插件，运行在浏览器之�?
-			//那么WinExec会被firefox浏览器拦�?而且WinExec不支持Unicode
-			//ShellExecute 会被搜狗浏览器拦�?
+			//如果是一个ActiveX插件，运行在浏览器中
+			//那么WinExec会被firefox浏览器拦截，而且WinExec不支持Unicode
+			//ShellExecute 会被搜狗浏览器拦截
 			//所以最后选择使用CreateProcess
 			BOOL bRet = ::CreateProcess(NULL, (LPWSTR)strCmdLine.c_str(), NULL, NULL, NULL, NORMAL_PRIORITY_CLASS, NULL, NULL, &stStartupInfo, &stProcessInfo);
 			if (bRet)
@@ -964,7 +964,7 @@ namespace WYGNet
 			}
 			else
 			{
-				//log�?::GetLastError();
+				//log ::GetLastError();
 			}
 		}
 		//意外情况，直接ShellExecute
