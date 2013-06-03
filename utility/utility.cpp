@@ -978,4 +978,19 @@ namespace WYGNet
 	}
 }
 
+namespace WYGTime
+{
+
+	std::wstring GetNowUTCTime()
+	{
+		__time64_t tm;
+		struct tm tmTime;
+		_time64(&tm);
+		_gmtime64_s (&tmTime, &tm);  //_localtime64_s  to get the local time.
+		wchar_t buf[1024];
+		_snwprintf_s(buf, _countof(buf), 1024-1, L"%d%02d%02d%02d%02d%02d", tmTime.tm_year+1900, tmTime.tm_mon+1, tmTime.tm_mday, tmTime.tm_hour, tmTime.tm_min, tmTime.tm_sec);
+		return buf;
+	}
+}
+
 }

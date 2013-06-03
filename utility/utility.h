@@ -116,4 +116,10 @@ namespace utility
 		bool OpenUrlByDefBrowser(const std::wstring& strUrl);
 	}
 
+	namespace WYGTime
+	{
+
+		std::wstring GetNowUTCTime();
+	}
+
 }
