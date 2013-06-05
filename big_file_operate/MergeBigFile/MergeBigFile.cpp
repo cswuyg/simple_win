@@ -153,6 +153,8 @@ void TestMemMap()
 	big_pos.QuadPart = 0;
 	while((read_file_size > nBlock) && (big_pos.QuadPart <= (read_file_size - nBlock)))
 	{
+		//特别注意，MapViewOfFile中的基地址，必须是64KB对齐的，因为这里比较简单就不需要处理
+		//做合并文件的时候，需要处理基地址对齐的问题
 		char* pRead = mem_file_read.MapView(big_pos.HighPart, big_pos.LowPart, nBlock);
 		char* pWrite = mem_file_write.MapView(big_pos.HighPart, big_pos.LowPart, nBlock);
 		errno_t eCpyRet = memcpy_s(pWrite, nBlock, pRead, nBlock);
