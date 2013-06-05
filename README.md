@@ -18,6 +18,7 @@ some knowledge about windows program.
 - [获取磁盘信息](./get_disk_space)
 - [让文字有包边](./word_shadow)  
 - [封装后的多媒体定时器](./multi_media_timer_test) 
+- [对大文件的操作](./big_file_operate) 
 
 
 

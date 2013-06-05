@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /*
 2012-12-10 始
 cswuyg@gmail.com
@@ -15,7 +15,7 @@ namespace utility
 	{
 		//读取文件 
 		BOOL WriteToDiskA(const std::wstring& strFilePath, std::string& data);
-		//读取文件
+		//读取文件(小于1G，大文件需要使用内存映射)
 		BOOL ReadFromDiskA(const std::wstring& strFilePath, std::string& data);
 		bool DeleteDirectory(const std::wstring& strFolder, bool bDelRootFolder);	
 		//获取可写的固定磁盘且有最大磁盘空间的盘符
@@ -23,13 +23,32 @@ namespace utility
 		//获取路径下的空余空间
 		unsigned int GetPathFreeSpace(const std::wstring& strPath); 
 		//获取文件大小
-		unsigned long GetFileSize(std::wstring& strFilePath);
+		LONGLONG GetFileSize(const std::wstring& strFilePath);
 		 //遇到空文件则删除，其他情况(非空文件、删除失败)则重命名..(重命名之后递归)
 		bool RenameAndDelTempFile(std::wstring& strDest, const std::wstring& strSource);
 		//文件存在则删除，删除失败则重命名，重命名之后还存在则删除，删除失败.则...（递归）
 		bool RenameAndDelFile(std::wstring& strDest, const std::wstring& strSource);
 		//打开文件所在文件夹并选中文件
 		bool OpenPathAndSelectFile(const std::wstring& strPath);
+		//内存映射，用于处理大文件
+		class  CMemoryMappedFile 
+		{
+		public:
+			CMemoryMappedFile(const std::wstring& strPath, DWORD CreateFile_dwDesiredAccess, DWORD dwCreationDisposition, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, DWORD MapView_dwDesiredAccess);
+			~CMemoryMappedFile();;
+
+			bool Initialize();  
+			char* MapView(DWORD dwFileOffsetHigh, DWORD dwFileOffsetLow, SIZE_T dwNumberOfBytesToMap);
+
+			LONGLONG length() const;
+			bool IsValid() const;
+
+		private:
+			char* m_data;
+			LONGLONG m_llFileSize;
+			HANDLE m_hMap;
+			DWORD m_dwDesiredAccess;
+		};
 	}
 
 	/**字符串处理相关*/

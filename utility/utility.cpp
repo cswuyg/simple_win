@@ -4,6 +4,8 @@
 #include <ShlObj.h>
 #pragma comment(lib, "Shell32.lib")
 #pragma comment( lib, "Shlwapi.lib" )
+#include <time.h>
+#include <assert.h>
 
 namespace utility
 {
@@ -40,15 +42,16 @@ BOOL ReadFromDiskA( const std::wstring& strFilePath, std::string& data )
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	do 
 	{
+		LONGLONG llCount = GetFileSize(strFilePath);
+		if (llCount > (1 * 1024 * 1024 * 1024))
+		{  //超过1G的文件不能使用本函数
+			assert(false);
+			return FALSE;
+		}
+		DWORD nCount = static_cast<unsigned long>(llCount);
 		hFile = ::CreateFile(strFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		IF_BREAK(hFile == INVALID_HANDLE_VALUE);
 
-		DWORD nCount = ::GetFileSize(hFile, NULL);
-		if (nCount == INVALID_FILE_SIZE)
-		{
-			//DWORD dwErr = GetLastError();
-			break;
-		}
 		DWORD nReturnCount = 0;
 		char* buf = new char[nCount+1];
 		::memset(buf, 0, nCount + 1);
@@ -58,7 +61,7 @@ BOOL ReadFromDiskA( const std::wstring& strFilePath, std::string& data )
 			delete [] buf;
 			break;
 		}
-		data = std::string(buf, nCount);
+		data = std::string(buf, nReturnCount);
 		delete [] buf;
 
 		::CloseHandle(hFile);
@@ -227,16 +230,29 @@ unsigned int GetPathFreeSpace(const std::wstring& strPath)
 	return (unsigned long)nFree;
 }
 
-unsigned long GetFileSize( std::wstring& strFilePath )
+LONGLONG GetFileSize( const std::wstring& strFilePath )
 {
 	HANDLE hFile = ::CreateFile(strFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
 		return 0;
 	}
-	unsigned long nCount = ::GetFileSize(hFile, NULL);
+	unsigned long nHight;
+	unsigned long nLow = ::GetFileSize(hFile, &nHight);
+	if (nLow == INVALID_FILE_SIZE)
+	{
+		DWORD dwError = ::GetLastError();
+		if (dwError != NO_ERROR)
+		{
+			return 0;
+		}
+	}
+
+	LONGLONG llRet = nHight;
+	llRet = llRet << 32;
+	llRet += nLow;
 	::CloseHandle(hFile);
-	return nCount;
+	return llRet;
 }
 #define MAX_FILE_RENAME_NUMBER 100
 bool RenameAndDelTempFile( std::wstring& strDest, const std::wstring& strSource )
@@ -328,6 +344,57 @@ bool OpenPathAndSelectFile( const std::wstring& strPath )
 	}
 	return bRet;
 }
+
+
+CMemoryMappedFile::CMemoryMappedFile( const std::wstring& strPath, DWORD CreateFile_dwDesiredAccess, DWORD dwCreationDisposition, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, DWORD MapView_dwDesiredAccess ) 
+: m_data(NULL)
+, m_llFileSize(0)
+, m_hMap(NULL)
+, m_dwDesiredAccess(MapView_dwDesiredAccess)
+{
+	m_llFileSize = GetFileSize(strPath);
+
+	HANDLE hFile = ::CreateFile(strPath.c_str(), CreateFile_dwDesiredAccess, 0, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		return;
+	}
+	m_hMap = ::CreateFileMapping(hFile, NULL, flProtect, dwMaximumSizeHigh, dwMaximumSizeLow, NULL);
+	::CloseHandle(hFile);
+}
+
+bool CMemoryMappedFile::IsValid() const
+{
+	return m_hMap != NULL;
+}
+
+LONGLONG CMemoryMappedFile::length() const
+{
+	return m_llFileSize;
+}
+
+char* CMemoryMappedFile::MapView(DWORD dwFileOffsetHigh, DWORD dwFileOffsetLow, SIZE_T dwNumberOfBytesToMap )
+{
+	if (m_data != NULL)
+	{
+		::UnmapViewOfFile(m_data);
+	}
+	m_data = static_cast<char*>(::MapViewOfFile(m_hMap, m_dwDesiredAccess, dwFileOffsetHigh, dwFileOffsetLow, dwNumberOfBytesToMap));
+	return m_data;
+}
+
+CMemoryMappedFile::~CMemoryMappedFile()
+{
+	if (m_data != NULL)
+	{
+		::UnmapViewOfFile(m_data);
+	}
+	if (m_hMap != NULL)
+	{
+		::CloseHandle(m_hMap);
+	}
+}
+
 
 	} //WYGFile
 
