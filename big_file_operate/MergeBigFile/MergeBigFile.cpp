@@ -147,62 +147,46 @@ void TestMemMap()
 		return;
 	}
 	LONGLONG read_file_size = mem_file_read.length();
-	if (read_file_size < 100 * 1024 * 1024)
+
+	unsigned int nBlock = 100 * 1024 * 1024;
+	_LARGE_INTEGER big_pos;
+	big_pos.QuadPart = 0;
+	while((read_file_size > nBlock) && (big_pos.QuadPart <= (read_file_size - nBlock)))
 	{
-		char* pRead = mem_file_read.MapView(0, 0, 0);
-		char* pWrite = mem_file_write.MapView(0, 0, 0);
-		errno_t eCpyRet = memcpy_s(pWrite, static_cast<rsize_t>(read_file_size), pRead, static_cast<rsize_t>(read_file_size));
-		if (eCpyRet != 0)
-		{
-			::OutputDebugString(L"memcpy_s error\r\n");
-		}
-		//for (LONGLONG i = 0; i != read_file_size; ++i)
-		//{
-		//	*(pWrite + i) = *(pRead + i);
-		//}
-	}
-	else
-	{
-		unsigned int nBlock = 100 * 1024 * 1024;
-		_LARGE_INTEGER big_pos;
-		big_pos.QuadPart = 0;
-		while(big_pos.QuadPart <= (read_file_size - nBlock))
-		{
-			char* pRead = mem_file_read.MapView(big_pos.HighPart, big_pos.LowPart, nBlock);
-			char* pWrite = mem_file_write.MapView(big_pos.HighPart, big_pos.LowPart, nBlock);
-			errno_t eCpyRet = memcpy_s(pWrite, nBlock, pRead, nBlock);
-			if (eCpyRet != 0)
-			{
-				::OutputDebugString(L"memcpy_s error\r\n");
-			}
-			//逐个字节的拷贝，速度极慢
-			//for (int i = 0; i != nBlock; ++i)
-			//{
-			//	*(pWrite + i) = *(pRead + i);
-			//}
-			big_pos.QuadPart += nBlock;
-		}
-		unsigned int nLastLength = static_cast<unsigned int>(read_file_size - big_pos.QuadPart);
-		char* pRead = mem_file_read.MapView(big_pos.HighPart, big_pos.LowPart, nLastLength);
-		char* pWrite = mem_file_write.MapView(big_pos.HighPart, big_pos.LowPart, nLastLength);
-		errno_t eCpyRet = memcpy_s(pWrite, nLastLength, pRead, nLastLength);
+		char* pRead = mem_file_read.MapView(big_pos.HighPart, big_pos.LowPart, nBlock);
+		char* pWrite = mem_file_write.MapView(big_pos.HighPart, big_pos.LowPart, nBlock);
+		errno_t eCpyRet = memcpy_s(pWrite, nBlock, pRead, nBlock);
 		if (eCpyRet != 0)
 		{
 			::OutputDebugString(L"memcpy_s error\r\n");
 		}
 		//逐个字节的拷贝，速度极慢
-		//for (int i = 0; i != nLastLength; ++i)
+		//for (int i = 0; i != nBlock; ++i)
 		//{
 		//	*(pWrite + i) = *(pRead + i);
 		//}
+		big_pos.QuadPart += nBlock;
 	}
+	unsigned int nLastLength = static_cast<unsigned int>(read_file_size - big_pos.QuadPart);
+	char* pRead = mem_file_read.MapView(big_pos.HighPart, big_pos.LowPart, nLastLength);
+	char* pWrite = mem_file_write.MapView(big_pos.HighPart, big_pos.LowPart, nLastLength);
+	errno_t eCpyRet = memcpy_s(pWrite, nLastLength, pRead, nLastLength);
+	if (eCpyRet != 0)
+	{
+		::OutputDebugString(L"memcpy_s error\r\n");
+	}
+	//逐个字节的拷贝，速度极慢
+	//for (int i = 0; i != nLastLength; ++i)
+	//{
+	//	*(pWrite + i) = *(pRead + i);
+	//}
 
 	std::wcout << L"TestMemMap Cost Time : " << cost_time.CostTime() << L" second"<< std::endl;
 }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	Testfopen();
+	//Testfopen();
 	TestMemMap();
 	system("pause");
 	return 0;
