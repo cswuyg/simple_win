@@ -37,7 +37,6 @@ namespace utility
 			CMemoryMappedFile(const std::wstring& strPath, DWORD CreateFile_dwDesiredAccess, DWORD dwCreationDisposition, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, DWORD MapView_dwDesiredAccess);
 			~CMemoryMappedFile();;
 
-			bool Initialize();  
 			char* MapView(DWORD dwFileOffsetHigh, DWORD dwFileOffsetLow, SIZE_T dwNumberOfBytesToMap);
 
 			LONGLONG length() const;
