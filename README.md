@@ -13,12 +13,14 @@ some knowledge about windows program.
 - [获取windows安装目录](./get_window_install_dir)
 - [QueryPerformance实现的高精度计时器](./hight_performance_time_calc)
 - [不依赖消息队列的定时器](./no_user_timer)
+- [封装后的多媒体定时器](./multi_media_timer_test)
+- [封装后的定时器队列](./timer_Queue_timer_test) 
 - [设置线程名称](./set_thread_name)
 - [使用SetWindowRgn实现透明文字](./use_rgn_api_to_transparent)  
 - [获取磁盘信息](./get_disk_space)
 - [让文字有包边](./word_shadow)  
-- [封装后的多媒体定时器](./multi_media_timer_test) 
 - [对大文件的操作](./big_file_operate) 
+
 
 
 

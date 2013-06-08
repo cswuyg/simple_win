@@ -215,7 +215,7 @@ unsigned int GetPathFreeSpace(const std::wstring& strPath)
 	wchar_t	szDriver[4] = L"A:\\";
 	szDriver[0] = (wchar_t)(nDriverNum + L'A');
 	if (!::GetVolumeInformation(szDriver, 0, 0, NULL,NULL, 0, NULL, 0)) 
-	{
+	{// lpFileSystemNameBuffer 参数可用于判断磁盘文件系统名称（FAT 或者 NTFS）
 		return 0;
 	}
 	ULARGE_INTEGER freeAv;
