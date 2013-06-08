@@ -1,5 +1,6 @@
 /**
 How to use TimerQueue.
+Thread safe.
 cswuyg@gmail.com
 2013.6.8
 */
@@ -42,4 +43,5 @@ private:
 private:
 	HANDLE m_hTimerQueue;           //< Timer Queue HANDLE
 	T_mapTimer m_mapTimeID;         //< TimerID & Timer HANDLE 
+	CRITICAL_SECTION m_section;
 };

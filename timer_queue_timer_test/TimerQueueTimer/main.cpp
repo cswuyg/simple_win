@@ -1,5 +1,6 @@
 /**
 How to use TimerQueue.
+Thread safe.
 cswuyg@gmail.com
 2013.6.8
 */
