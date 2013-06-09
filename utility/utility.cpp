@@ -405,6 +405,17 @@ std::wstring int2wstr( int nData )
 	wchar_t wchBuf[32] = L"";
 	::swprintf_s(wchBuf, L"%d", nData);
 	return wchBuf;
+
+	//wchar_t wchBuf[32] = L"";
+	//_itow_s(nData, wchBuf, 32, 10);
+	//return wchBuf;
+}
+
+std::string int2str( int nData )
+{
+	char chBuf[32] = "";
+	_itoa_s(nData, chBuf, 32, 10);
+	return chBuf;
 }
 
 std::string wstr2str( const std::wstring& strInput, int nEncode )
@@ -436,7 +447,30 @@ std::wstring str2wstr( const std::string& strInput, int nEncode )
 	delete[] buf;
 	return strResult;
 }
+
+std::wstring double2wstr( double dData )
+{
+	wchar_t wchBuf[32] = L"";
+	::swprintf_s(wchBuf, L"%0.4f", dData);
+	return wchBuf;
 }
+
+std::wstring longlong2wstr( LONGLONG llData )
+{
+	wchar_t wchBuf[128] = L"";
+	_i64tow_s(llData, wchBuf, 128, 10);
+	return wchBuf;
+}
+
+std::string longlong2str( LONGLONG llData )
+{
+	char chBuf[128] = "";
+	_i64toa_s(llData, chBuf, 128, 10);
+	return chBuf;
+}
+}
+
+
 namespace WYGAPP
 {
 std::wstring GetAppFullName()
@@ -1058,6 +1092,24 @@ namespace WYGTime
 		_snwprintf_s(buf, _countof(buf), 1024-1, L"%d%02d%02d%02d%02d%02d", tmTime.tm_year+1900, tmTime.tm_mon+1, tmTime.tm_mday, tmTime.tm_hour, tmTime.tm_min, tmTime.tm_sec);
 		return buf;
 	}
+}
+
+namespace WYGOther
+{
+	std::wstring GetGUID()
+	{
+		wchar_t buffer[128] = { 0 };
+		GUID guid;
+		if (CoCreateGuid(&guid) != S_OK)
+		{
+			return L"";
+		}
+		::_snwprintf_s(buffer, _countof(buffer), _countof(buffer), L"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",
+			guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1], guid.Data4[2], 
+			guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+		return std::wstring(buffer, 64);
+	}
+
 }
 
 }

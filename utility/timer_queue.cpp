@@ -1,28 +1,36 @@
 #include "timer_queue.h"
+#include "auto_lock.h"
 
 #include <assert.h>
-
 
 CTQTimer::CTQTimer()
 {
 	m_hTimerQueue = ::CreateTimerQueue();
+	::InitializeCriticalSection(&m_section);
 }
 
 CTQTimer::~CTQTimer()
 {
-	if (m_mapTimeID.size() != 0)
 	{
-		//you forget ::DeleteTimerQueueTimer ?
-		assert(false);
+		CAutoLock lock(&m_section);
+		if (m_mapTimeID.size() != 0)
+		{
+			//you forget ::DeleteTimerQueueTimer ?
+			m_mapTimeID.clear();
+			assert(false);
+		}
+		if (m_hTimerQueue != NULL)
+		{
+			BOOL bDel = ::DeleteTimerQueueEx(m_hTimerQueue, INVALID_HANDLE_VALUE);
+			m_hTimerQueue = NULL;
+		}
 	}
-	if (m_hTimerQueue != NULL)
-	{
-		BOOL bDel = ::DeleteTimerQueueEx(m_hTimerQueue, INVALID_HANDLE_VALUE);
-	}
+	::DeleteCriticalSection(&m_section);
 }
 
 BOOL CTQTimer::SetTimer( ITQTimerCallBack* pCallback, UINT nUserTimerID, DWORD uElapse, BOOL bOnce /*= FALSE*/ )
 {
+	CAutoLock lock(&m_section);
 	if (m_hTimerQueue != NULL)
 	{
 		HANDLE hTimer;
@@ -32,7 +40,9 @@ BOOL CTQTimer::SetTimer( ITQTimerCallBack* pCallback, UINT nUserTimerID, DWORD u
 			dwPeriod = 0;
 		}
 		BOOL bCreate = ::CreateTimerQueueTimer(&hTimer, m_hTimerQueue, TQTimerCallBack, pCallback, uElapse, dwPeriod, WT_EXECUTEDEFAULT);
-		m_mapTimeID.insert(std::make_pair(nUserTimerID, hTimer));
+		{
+			m_mapTimeID.insert(std::make_pair(nUserTimerID, hTimer));
+		}
 		return bCreate;
 	}
 	return FALSE;
@@ -40,30 +50,36 @@ BOOL CTQTimer::SetTimer( ITQTimerCallBack* pCallback, UINT nUserTimerID, DWORD u
 
 BOOL CTQTimer::KillTimer( UINT nUserTimerID )
 {
-	T_mapTimer::iterator it = m_mapTimeID.find(nUserTimerID);
-	if (it != m_mapTimeID.end())
+	CAutoLock lock(&m_section);
+	if (m_hTimerQueue != NULL)
 	{
-		::DeleteTimerQueueTimer(m_hTimerQueue, it->second, INVALID_HANDLE_VALUE);
-		m_mapTimeID.erase(it);
-		return TRUE;
+		T_mapTimer::iterator it = m_mapTimeID.find(nUserTimerID);
+		if (it != m_mapTimeID.end())
+		{
+			//the last parameter can not use INVALID_HANDLE_VALUE, it must be NULL!
+			//because this function can be call by callback, 
+			//and if use INVALID_HANDLE_VALUE, DeleteTimerQueueTimer will wait callback function return,
+			//so dead lock. DeleteTimerQueueTimer will never return.
+			::DeleteTimerQueueTimer(m_hTimerQueue, it->second, NULL);
+			m_mapTimeID.erase(it);
+			return TRUE;
+		}
 	}
-	else
-	{
-		assert(false);
-		return FALSE;
-	}
+	assert(false);
+	return FALSE;
 }
 
 BOOL CTQTimer::HasTimer( UINT nUserTimerID )
 {
-	if (m_mapTimeID.find(nUserTimerID) != m_mapTimeID.end())
+	CAutoLock lock(&m_section);
+	if (m_hTimerQueue != NULL)
 	{
-		return TRUE;
+		if (m_mapTimeID.find(nUserTimerID) != m_mapTimeID.end())
+		{
+			return TRUE;
+		}
 	}
-	else
-	{
-		return FALSE;
-	}
+	return FALSE;
 }
 
 void  CALLBACK CTQTimer::TQTimerCallBack( LPVOID pVoid, BOOLEAN bTimeOrWait )
@@ -78,3 +94,4 @@ void  CALLBACK CTQTimer::TQTimerCallBack( LPVOID pVoid, BOOLEAN bTimeOrWait )
 		assert(false);
 	}
 }
+

@@ -56,7 +56,11 @@
 			T_mapTimer::iterator it = m_mapTimeID.find(nUserTimerID);
 			if (it != m_mapTimeID.end())
 			{
-				::DeleteTimerQueueTimer(m_hTimerQueue, it->second, INVALID_HANDLE_VALUE);
+				//the last parameter can not use INVALID_HANDLE_VALUE, it must be NULL!
+				//because this function can be call by callback, 
+				//and if use INVALID_HANDLE_VALUE, DeleteTimerQueueTimer will wait callback function return,
+				//so dead lock. DeleteTimerQueueTimer will never return.
+				::DeleteTimerQueueTimer(m_hTimerQueue, it->second, NULL);
 				m_mapTimeID.erase(it);
 				return TRUE;
 			}

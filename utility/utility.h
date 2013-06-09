@@ -54,6 +54,10 @@ namespace utility
 	namespace WYGString
 	{
 		std::wstring int2wstr(int nData);
+		std::string int2str(int nData);
+		std::wstring double2wstr(double dData);
+		std::wstring longlong2wstr(LONGLONG llData);
+		std::string longlong2str(LONGLONG llData);
 		std::string wstr2str(const std::wstring& strInput, int nEncode);
 		std::wstring str2wstr(const std::string& strInput, int nEncode);
 	}
@@ -125,7 +129,7 @@ namespace utility
 		void SaveBitmapToFile_2( HBITMAP hBitmap, LPCTSTR lpFileName );
 	}
 	
-	
+	//网络相关
 	namespace WYGNet
 	{
 		/**
@@ -134,10 +138,16 @@ namespace utility
 		bool OpenUrlByDefBrowser(const std::wstring& strUrl);
 	}
 
+	//时间相关
 	namespace WYGTime
 	{
-
 		std::wstring GetNowUTCTime();
+	}
+
+	//其他
+	namespace WYGOther
+	{
+		std::wstring GetGUID();
 	}
 
 }
