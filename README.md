@@ -22,6 +22,7 @@ some knowledge about windows program.
 - [对大文件的操作](./big_file_operate) 
 - [文件（夹）名的合法字符](./legal_path_character) 
 - [RSA、AES加密例子,使用openssl库](./openssl_test)
+- [zlib的使用](./zlib_test)
 
 
 
