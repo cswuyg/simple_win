@@ -61,10 +61,33 @@ public:
 };
 
 
+class CSetInvalidHandle
+{
+public:
+	CSetInvalidHandle()
+	{
+#if _MSC_VER >= 1400  // MSVC 2005/8
+		m_preIph = _set_invalid_parameter_handler(MyInvalidParameterHandler);
+#endif  // _MSC_VER >= 1400
+		m_prePch = _set_purecall_handler(MyPureCallHandler);
+	};
+	~CSetInvalidHandle()
+	{
+#if _MSC_VER >= 1400  // MSVC 2005/8
+		_set_invalid_parameter_handler(m_preIph);
+#endif  // _MSC_VER >= 1400
+		_set_purecall_handler(m_prePch);
+	};
+private:
+	_invalid_parameter_handler m_preIph;
+	_purecall_handler m_prePch;	
+};
+
+
 int main()
 {
-	_set_invalid_parameter_handler(MyInvalidParameterHandler);
-	_set_purecall_handler(MyPureCallHandler);
+	CSetInvalidHandle obj;
+
 	try
 	{
 		char* p = NULL;
