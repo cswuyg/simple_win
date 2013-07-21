@@ -24,6 +24,7 @@ some knowledge about windows program.
 - [RSA、AES加密例子,使用openssl库](./openssl_test)
 - [zlib的使用](./zlib_test)
 - [设置CRT参数异常、purecall的handler](./invalidHandler)
+- [进程内捕获dump（catch dump in-process）](./dump_catch)
 
 
 
