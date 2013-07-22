@@ -21,15 +21,15 @@ void simple_log(const std::wstring& log_msg)
 
 static void MyPureCallHandler(void)
 {	
-	throw std::invalid_argument("");
 	simple_log(L"MyPureCallHandler");
+	throw std::invalid_argument("");
 }
 
 static void MyInvalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, unsigned int line, uintptr_t pReserved)
 {
+	simple_log(L"MyPureCallHandler");
 	//The parameters all have the value NULL unless a debug version of the CRT library is used.
 	throw std::invalid_argument("");
-	simple_log(L"MyInvalidParameterHandler");
 }
 
 class IPureCall

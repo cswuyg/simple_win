@@ -13,6 +13,34 @@ namespace CatchDumpFile
 		::SendMessage(hSend, WM_COPYDATA, 0, (LPARAM)&copydate);
 	}
 
+	void CDumpCatch::MyPureCallHandler(void)
+	{	
+		simple_log(L"MyPureCallHandler");
+		throw std::invalid_argument("");
+	}
+
+	void CDumpCatch::MyInvalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, unsigned int line, uintptr_t pReserved)
+	{
+		simple_log(L"MyPureCallHandler");
+		//The parameters all have the value NULL unless a debug version of the CRT library is used.
+		throw std::invalid_argument("");
+	}
+
+	void CDumpCatch::SetInvalidHandle()
+	{
+#if _MSC_VER >= 1400  // MSVC 2005/8
+		m_preIph = _set_invalid_parameter_handler(MyInvalidParameterHandler);
+#endif  // _MSC_VER >= 1400
+		m_prePch = _set_purecall_handler(MyPureCallHandler);   //At application, this call can stop show the error message box.
+	}
+	void CDumpCatch::UnSetInvalidHandle()
+	{
+#if _MSC_VER >= 1400  // MSVC 2005/8
+		_set_invalid_parameter_handler(m_preIph);
+#endif  // _MSC_VER >= 1400
+		_set_purecall_handler(m_prePch); //At application this can stop show the error message box.
+	}
+
 	LPTOP_LEVEL_EXCEPTION_FILTER WINAPI CDumpCatch::TempSetUnhandledExceptionFilter( LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter )
 	{
 		return NULL;
@@ -37,11 +65,13 @@ namespace CatchDumpFile
 
 	CDumpCatch::CDumpCatch()
 	{
+		SetInvalidHandle();
 		AddExceptionHandle();
 	}
 
 	CDumpCatch::~CDumpCatch()
 	{
+		UnSetInvalidHandle();
 		RemoveExceptionHandle();
 	}
 
