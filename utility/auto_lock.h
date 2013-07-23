@@ -1,6 +1,6 @@
 /**
-How to use TimerQueue.
-Thread safe.
+auto lock
+
 cswuyg@gmail.com
 2013.6.8
 */
