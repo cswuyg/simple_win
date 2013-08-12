@@ -74,6 +74,10 @@ namespace WYGTickLog
 		{
 			return;
 		}
+		DWORD dwHightSize = 0;
+		DWORD dwFileSize = ::GetFileSize(hFile, &dwHightSize);
+		m_llPos.LowPart = dwFileSize;
+		m_llPos.HighPart = dwHightSize;
 		m_llTotal.QuadPart += llRequireSize;
 		_LARGE_INTEGER  llAlign;
 		llAlign.QuadPart = m_llTotal.QuadPart % kBlock;

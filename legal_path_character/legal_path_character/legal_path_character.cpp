@@ -16,17 +16,26 @@ cswuyg
 */
 BOOL IsLegalPathCharacter(const std::wstring& strPath)
 {
+	if (strPath.length() < 4)
+	{
+		return FALSE;
+	}
 	BOOL bRet = TRUE;
 	std::wstring strExclude = L"\\/:*?\"<>|";      //illegal characters
 	wchar_t* pBufName = new wchar_t[strPath.length() + 1];
 	::memset(pBufName, 0, strPath.length()+1);
 	::wcsncpy_s(pBufName, strPath.length()+1, strPath.c_str(), strPath.length());
-	wchar_t* pNoRootName = ::PathSkipRoot(pBufName);
-	if (pNoRootName == NULL)
+	std::wstring strDisk = strPath.substr(0, 3);
+	if (strDisk[1] != L':' || (strDisk[2] != L'\\' && strDisk[2] != L'/'))
 	{
 		return FALSE;
 	}
-	std::wstring strParentPath = pNoRootName;
+	BOOL bDiskExist = ::PathFileExists(strDisk.c_str());
+	if (!bDiskExist)
+	{
+		return FALSE;
+	}
+	wchar_t* pNoRootName = pBufName+3;//::PathSkipRoot(pBufName);
 	::PathStripPath(pNoRootName);
 	std::wstring strName = pNoRootName;
 	::wcsncpy_s(pBufName, strParentPath.length()+1, strParentPath.c_str(), strParentPath.length());
