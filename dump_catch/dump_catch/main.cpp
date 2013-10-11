@@ -33,6 +33,8 @@ CatchDumpFile::CDumpCatch g_exception_handler;
 
 void test_release_dump()
 {
+	//It will not show the assert window when in debug model has a invalid parameter assert.
+	_CrtSetReportMode(_CRT_ASSERT, 0);
 	//char* p = 0;
 	//printf(p);
 	CPureCall obj;

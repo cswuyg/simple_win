@@ -103,6 +103,76 @@ bool DeleteDirectory( const std::wstring& strFolder, bool bDelRootFolder )
 }
 
 
+//const wchar_t* const kPath = L"C:\\temp\\test\\test";
+//const wchar_t* const kPath = L"c:/temp/test test/test";
+//const wchar_t* const kPath = L"c:/temp\\test x test/test";
+//const wchar_t* const kPath = L"c:\\temp x\\test y x test/test";
+
+BOOL MyCreateDirectory( const std::wstring& strDir )
+{
+	if (strDir.empty() || strDir.length() < 3 || strDir[1] != L':')
+	{
+		return FALSE;
+	}
+	std::wstring sub_dir = strDir;
+	wchar_t last_char = sub_dir[sub_dir.length()-1];
+	if ( last_char != L'\\' && last_char != L'/')
+	{
+		sub_dir += L'\\';
+	}
+	std::wstring::size_type gap_pos_1 = sub_dir.find_first_of(L'\\', 0);
+	std::wstring::size_type gap_pos_2 = sub_dir.find_first_of(L'/', 0);
+	if (gap_pos_1 == std::wstring::npos)
+	{
+		gap_pos_1 = 0xFFFFFFFF;
+	}
+	if (gap_pos_2 == std::wstring::npos)
+	{
+		gap_pos_2 = 0xFFFFFFFF;
+	}
+	std::wstring::size_type gap_pos = min(gap_pos_1, gap_pos_2);
+	if (gap_pos == 0xFFFFFFFF)
+	{
+		return FALSE;
+	}
+
+	BOOL bRet = TRUE;
+	std::wstring::size_type gap_pos_bak = gap_pos;
+	while(gap_pos != std::wstring::npos)
+	{
+		std::wstring pre_dir = strDir.substr(0, gap_pos);
+		BOOL bCreate =  ::CreateDirectory(pre_dir.c_str(), NULL);
+		if (bCreate == 0)
+		{
+			DWORD dwError = ::GetLastError();
+			if (dwError != ERROR_ALREADY_EXISTS)
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		gap_pos_bak = gap_pos;
+		std::wstring::size_type gap_pos_1 = sub_dir.find_first_of(L'\\', gap_pos_bak+1);
+		std::wstring::size_type gap_pos_2 = sub_dir.find_first_of(L'/', gap_pos_bak+1);
+		if (gap_pos_1 == std::wstring::npos)
+		{
+			gap_pos_1 = 0xFFFFFFFF;
+		}
+		if (gap_pos_2 == std::wstring::npos)
+		{
+			gap_pos_2 = 0xFFFFFFFF;
+		}
+		gap_pos = min(gap_pos_1, gap_pos_2);
+		if (gap_pos == 0xFFFFFFFF)
+		{
+			break;
+		}
+	}
+
+	return bRet;
+}
+
+
 bool IsDiskCanWrite(const std::wstring& strDisk)
 {
 	std::wstring strTestDir = strDisk + L":\\cswuyg4822FBB5";
@@ -623,7 +693,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	HDC hTempDC = ::CreateDC(L"DISPLAY", NULL, NULL, NULL); 
 	int iBits = ::GetDeviceCaps(hTempDC, BITSPIXEL) * ::GetDeviceCaps(hTempDC, PLANES); //当前显示分辨率下每个像素所占字节数 
 	::DeleteDC(hTempDC); 
-	//iBits = 1; //将其改为1，可以实现黑白位囿
+	//iBits = 1; //将其改为1，可以实现黑白位图
 	WORD wBitCount = 0; //位图中每个像素所占位
 	if (iBits <= 1) 
 		wBitCount = 1; 
@@ -636,8 +706,8 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	else if (iBits <= 32)
 		wBitCount = 32;
 
-	//计算调色板所占空闿
-	//如果一个像素所占空间小于等亿位，则使用调色板，否则直接存储RGB
+	//计算调色板所占空间
+	//如果一个像素所占空间小于等于8位，则使用调色板，否则直接存储RGB
 	DWORD dwPaletteSize=0;
 	if (wBitCount <= 8) 
 	{
@@ -647,7 +717,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	 DWORD dwDIBSize, dwWritten; 
 	//获取DDB位图信息，然后设置文件位图信息头结构 
 	::GetObject(hDDBmap, sizeof(BITMAP), (LPSTR)&Bitmap); 
-	BITMAPINFOHEADER bi; //位图信息夿
+	BITMAPINFOHEADER bi; //位图信息头
 	::memset(&bi, 0, sizeof(BITMAPINFOHEADER));
 	bi.biSize = sizeof(BITMAPINFOHEADER); 
 	bi.biWidth = Bitmap.bmWidth; 
@@ -663,7 +733,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	
 	DWORD dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;   //向上取整
 	//为位图内容分配内孿
-	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //位图信息夿
+	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)new(std::nothrow) char[dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)]; //位图信息头
 	*lpbi = bi; 
 	// 处理调色板
 	HANDLE hOldPal = NULL;
@@ -675,7 +745,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		hOldPal = ::SelectPalette(hDCPalatte, (HPALETTE)hPal, FALSE); 
 		::RealizePalette(hDCPalatte); 
 	} 
-	// 获取该调色板下新的像紿
+	// 获取该调色板下新的像素
 	::GetDIBits(hDCPalatte, hDDBmap, 0, (UINT) Bitmap.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO) lpbi, DIB_RGB_COLORS); 
 	//恢复调色板
 	if (hOldPal) 
@@ -695,7 +765,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 		return -1; 
 	}
 	//设置位图文件
-	BITMAPFILEHEADER bmfHdr; //位图文件夿
+	BITMAPFILEHEADER bmfHdr; //位图文件头
 	::memset(&bmfHdr, 0, sizeof(BITMAPFILEHEADER));
 	bmfHdr.bfType = 0x4D42;   // "BM " 
 	//位图文件大小：位图文件头 +　位图信头 + 调色板空闿+ 位图真实数据空间
@@ -703,7 +773,7 @@ int SaveBitmapToFile( HBITMAP hDDBmap, LPCTSTR lpFileName )
 	bmfHdr.bfSize = dwDIBSize; 
 	/*bmfHdr.bfReserved1 = 0; 
 	bmfHdr.bfReserved2 = 0;*/ 
-	//位图真实数据位置：位图文件头 +　位图信息夿+ 调色板空闿
+	//位图真实数据位置：位图文件头 +　位图信息头 + 调色板空间
 	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; // 写入位图文件
 
 	::WriteFile(hFile, (LPSTR)&bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL); 
@@ -821,7 +891,7 @@ HBITMAP DIBToDDB( HANDLE hDIB )
 
 	lpbi = (LPBITMAPINFOHEADER)hDIB;
 	int nColors = 0;
-	//每个像素用小于等亿位表示时，才有调色板
+	//每个像素用小于等于8位表示时，才有调色板
 	if ( lpbi->biBitCount <= 8)
 	{
 		nColors = lpbi->biClrUsed ? lpbi->biClrUsed : 1 << lpbi->biBitCount;
@@ -1107,7 +1177,7 @@ namespace WYGOther
 		::_snwprintf_s(buffer, _countof(buffer), _countof(buffer), L"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",
 			guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1], guid.Data4[2], 
 			guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
-		return std::wstring(buffer, 64);
+		return buffer;
 	}
 
 }

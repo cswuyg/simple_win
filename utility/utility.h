@@ -18,6 +18,7 @@ namespace utility
 		//读取文件(小于1G，大文件需要使用内存映射)
 		BOOL ReadFromDiskA(const std::wstring& strFilePath, std::string& data);
 		bool DeleteDirectory(const std::wstring& strFolder, bool bDelRootFolder);	
+		BOOL MyCreateDirectory(const std::wstring& strDir);
 		//获取可写的固定磁盘且有最大磁盘空间的盘符
 		wchar_t GetMaxFreeCanWriteDiskID(ULONGLONG& freeSpace);    
 		//获取路径下的空余空间
