@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "install_service", "install_service\install_service.vcxproj", "{0DD9C009-2221-4BAB-A75E-7DB000DF17D0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "service_example", "service_example\service_example.vcxproj", "{2B51F1AB-DD9D-4596-BE13-997C79B3964F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0DD9C009-2221-4BAB-A75E-7DB000DF17D0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0DD9C009-2221-4BAB-A75E-7DB000DF17D0}.Debug|Win32.Build.0 = Debug|Win32
+		{0DD9C009-2221-4BAB-A75E-7DB000DF17D0}.Release|Win32.ActiveCfg = Release|Win32
+		{0DD9C009-2221-4BAB-A75E-7DB000DF17D0}.Release|Win32.Build.0 = Release|Win32
+		{2B51F1AB-DD9D-4596-BE13-997C79B3964F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2B51F1AB-DD9D-4596-BE13-997C79B3964F}.Debug|Win32.Build.0 = Debug|Win32
+		{2B51F1AB-DD9D-4596-BE13-997C79B3964F}.Release|Win32.ActiveCfg = Release|Win32
+		{2B51F1AB-DD9D-4596-BE13-997C79B3964F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
