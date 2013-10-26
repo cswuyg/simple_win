@@ -26,6 +26,7 @@ some knowledge about windows program.
 - [设置CRT参数异常、purecall的handler](./invalidHandler)
 - [进程内捕获dump（catch dump in-process）](./dump_catch)
 - [创建托盘区icon的几行代码(create tray icon)](./tray_icon_example)
+- [windows服务开发（windows services）](./my_service_example)
 
 
 
