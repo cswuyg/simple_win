@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pipe_client", "pipe_client\pipe_client.vcxproj", "{9EB779DF-4185-47D5-B95D-19BADB43FE32}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pipe_server", "pipe_server\pipe_server.vcxproj", "{193213A3-A4E9-40B4-987C-5DC709135967}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9EB779DF-4185-47D5-B95D-19BADB43FE32}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9EB779DF-4185-47D5-B95D-19BADB43FE32}.Debug|Win32.Build.0 = Debug|Win32
+		{9EB779DF-4185-47D5-B95D-19BADB43FE32}.Release|Win32.ActiveCfg = Release|Win32
+		{9EB779DF-4185-47D5-B95D-19BADB43FE32}.Release|Win32.Build.0 = Release|Win32
+		{193213A3-A4E9-40B4-987C-5DC709135967}.Debug|Win32.ActiveCfg = Debug|Win32
+		{193213A3-A4E9-40B4-987C-5DC709135967}.Debug|Win32.Build.0 = Debug|Win32
+		{193213A3-A4E9-40B4-987C-5DC709135967}.Release|Win32.ActiveCfg = Release|Win32
+		{193213A3-A4E9-40B4-987C-5DC709135967}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

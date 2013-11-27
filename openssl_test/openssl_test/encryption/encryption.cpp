@@ -185,7 +185,7 @@ namespace Encryption
 		data_length += padding;
 		while (padding > 0)
 		{
-			data_bak += "\0";
+			data_bak += '\0';
 			padding--;
 		}
 		for(unsigned int i = 0; i < data_length/AES_BLOCK_SIZE; i++)
