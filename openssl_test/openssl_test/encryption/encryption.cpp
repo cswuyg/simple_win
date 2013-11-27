@@ -192,6 +192,7 @@ namespace Encryption
 		{
 			std::string str16 = data_bak.substr(i*AES_BLOCK_SIZE, AES_BLOCK_SIZE);
 			unsigned char out[AES_BLOCK_SIZE];
+			::memset(out, 0, AES_BLOCK_SIZE);
 			AES_encrypt((const unsigned char*)str16.c_str(), out, &aes_key);
 			strRet += std::string((const char*)out, AES_BLOCK_SIZE);
 		}
@@ -211,6 +212,7 @@ namespace Encryption
 		{
 			std::string str16 = strData.substr(i*AES_BLOCK_SIZE, AES_BLOCK_SIZE);
 			unsigned char out[AES_BLOCK_SIZE];
+			::memset(out, 0, AES_BLOCK_SIZE);
 			AES_decrypt((const unsigned char*)str16.c_str(), out, &aes_key);
 			strRet += std::string((const char*)out, AES_BLOCK_SIZE);
 		}
