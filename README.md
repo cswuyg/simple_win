@@ -28,6 +28,7 @@ some knowledge about windows program.
 - [创建托盘区icon的几行代码(create tray icon)](./tray_icon_example)
 - [windows服务开发（windows services）](./my_service_example)
 - [管道简用（pipe demo）](./pipe_example)
+- [校验微软数字签名(check microsofe verify)](./check_microsoft_verify)
 
 
 
