@@ -29,9 +29,8 @@ some knowledge about windows program.
 - [windows服务开发（windows services）](./my_service_example)
 - [管道简用（pipe demo）](./pipe_example)
 - [校验微软数字签名(check microsofe verify)](./check_microsoft_verify)
-
-
-
+- [获取本机所设置时区(get local time zone)](./time_zone)
+- [获取DNS解析后的IP(DnsQuery)](./dns_query)
 
   
   
