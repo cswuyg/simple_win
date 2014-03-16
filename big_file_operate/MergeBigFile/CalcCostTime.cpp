@@ -28,7 +28,7 @@ double CCostTime::CostTime()
 }
 
 #ifdef _DEBUG
-void CCostTime::debug_log( const std::wstring log_msg )
+void CCostTime::debug_log( const std::wstring& log_msg )
 {
 	HWND hSend = ::FindWindow(NULL, (LPCWSTR)&L"cswuyg_debug_Log_wnd");
 
