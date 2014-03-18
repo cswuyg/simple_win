@@ -25,7 +25,8 @@ public:
 	BOOL StopService(const std::wstring& service_name, BOOL stop_dependence);
 	BOOL DeleteService(const std::wstring& service_name);
 
-	BOOL DoUpdateSvcDesc(const std::wstring& service_name, const std::wstring& service_discription);
+	BOOL UpdateSvcDesc(const std::wstring& service_name, const std::wstring& service_discription);
+	BOOL AutoStart(const std::wstring& service_name);
 
 private:
 	BOOL StopServiceDependence(SC_HANDLE service_handle);

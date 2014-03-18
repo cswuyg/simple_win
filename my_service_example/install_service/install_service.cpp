@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "service_control/service_control.h"
 
-const wchar_t* const kServiceName = L"cswuyg_wuyinguang1e1";
+const wchar_t* const kServiceName = L"cswuyg_wuyinguang1g1";
 const wchar_t* const kBinPath = L"D:\\temp\\my_service_example\\output\\Debug\\bin\\service_example.exe";
 
 
@@ -37,8 +37,9 @@ void test_service()
 	std::wstring app_path = GetAppPath();
 	app_path += L"\\service_example.exe";
 	control.InstallService(app_path, kServiceName);
-	control.DoUpdateSvcDesc(kServiceName, L"This cswuyg's Service, No Harm");
+	control.UpdateSvcDesc(kServiceName, L"This cswuyg's service, no harm.");
 	control.StartService(kServiceName);
+	control.AutoStart(kServiceName);
 	::Sleep(30000000);
 	control.StopService(kServiceName, FALSE);
 	control.DeleteService(kServiceName);

@@ -294,7 +294,7 @@ BOOL ServiceControl::DeleteService(const std::wstring& service_name)
 }
 
 
-BOOL ServiceControl::DoUpdateSvcDesc( const std::wstring& service_name, const std::wstring& service_discription )
+BOOL ServiceControl::UpdateSvcDesc( const std::wstring& service_name, const std::wstring& service_discription )
 {
 	// Get a handle to the SCM database. 
 	SC_HANDLE schSCManager = ::OpenSCManager( 
@@ -346,4 +346,64 @@ BOOL ServiceControl::DoUpdateSvcDesc( const std::wstring& service_name, const st
 	CloseServiceHandle(schService); 
 	CloseServiceHandle(schSCManager);
 	return bRet;
+}
+
+BOOL ServiceControl::AutoStart( const std::wstring& service_name )
+{
+
+    // Get a handle to the SCM database. 
+ 
+ SC_HANDLE schSCManager = ::OpenSCManager( 
+        NULL,                    // local computer
+        NULL,                    // ServicesActive database 
+        SC_MANAGER_ALL_ACCESS);  // full access rights 
+ 
+    if (NULL == schSCManager) 
+    {
+      //  printf("OpenSCManager failed (%d)\n", GetLastError());
+        return FALSE;
+    }
+
+    // Get a handle to the service.
+
+    SC_HANDLE schService = ::OpenService( 
+        schSCManager,            // SCM database 
+        service_name.c_str(),               // name of service 
+        SERVICE_CHANGE_CONFIG);  // need change config access 
+ 
+    if (schService == NULL)
+    { 
+        //printf("OpenService failed (%d)\n", GetLastError()); 
+        ::CloseServiceHandle(schSCManager);
+        return FALSE;
+    }    
+
+    // Change the service start type.
+
+	BOOL bRet = FALSE;
+    if (!::ChangeServiceConfig( 
+        schService,        // handle of service 
+        SERVICE_NO_CHANGE, // service type: no change 
+        SERVICE_AUTO_START,  // service start type 
+        SERVICE_NO_CHANGE, // error control: no change 
+        NULL,              // binary path: no change 
+        NULL,              // load order group: no change 
+        NULL,              // tag ID: no change 
+        NULL,              // dependencies: no change 
+        NULL,              // account name: no change 
+        NULL,              // password: no change 
+        NULL) )            // display name: no change
+    {
+        //printf("ChangeServiceConfig failed (%d)\n", GetLastError()); 
+		bRet = FALSE;
+    }
+	else
+	{
+		//printf("Service disabled successfully.\n"); 
+		bRet= TRUE;
+	}
+
+	return bRet;
+    ::CloseServiceHandle(schService); 
+    ::CloseServiceHandle(schSCManager);
 }
