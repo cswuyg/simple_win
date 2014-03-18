@@ -117,7 +117,7 @@ HANDLE DDBToDIB( HBITMAP bitmap, DWORD dwCompression, HPALETTE Pal )
 	bi.biWidth = bm.bmWidth;
 	bi.biHeight = bm.bmHeight;
 	bi.biPlanes = 1;
-	bi.biBitCount = bm.bmPlanes * bm.bmBitsPixel;
+	bi.biBitCount = bm.bmPlanes * bm.bmBitsPixel;  //颜色平面（就是1） * 需要几bit标识一个像素
 	bi.biCompression = dwCompression;
 	// Compute the size of the infoheader and the color table
 	int nColors = 0;

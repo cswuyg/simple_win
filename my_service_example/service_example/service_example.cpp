@@ -4,6 +4,22 @@
 #include "stdafx.h"
 #include "service\service_gui.h"
 
+
+
+#ifdef _DEBUG
+#pragma comment(lib, "libGUIDd.lib")
+#pragma comment(lib, "LibDataReportd.lib")
+#else
+#pragma comment(lib, "libGUID.lib")
+#pragma comment(lib, "LibDataReport.lib")
+#endif
+
+#include "guid.h"
+#include "IDataReport.h"
+#include "report_head_lib.h"
+
+
+
 BOOL service_test()
 {
 	ServiceWithGUI obj;

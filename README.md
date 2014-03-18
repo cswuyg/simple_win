@@ -31,8 +31,8 @@ some knowledge about windows program.
 - [校验微软数字签名(check microsofe verify)](./check_microsoft_verify)
 - [获取本机所设置时区(get local time zone)](./time_zone)
 - [获取DNS解析后的IP(DnsQuery)](./dns_query)
-
-  
+- [浏览文件夹打开文件(browser open file)](./browser_open_file)
+- [PE文件相关(PE file)](./pe)
   
 
 - [共用函数库](./utility)  

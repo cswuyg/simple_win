@@ -292,3 +292,58 @@ BOOL ServiceControl::DeleteService(const std::wstring& service_name)
 		return TRUE;
 	}
 }
+
+
+BOOL ServiceControl::DoUpdateSvcDesc( const std::wstring& service_name, const std::wstring& service_discription )
+{
+	// Get a handle to the SCM database. 
+	SC_HANDLE schSCManager = ::OpenSCManager( 
+		NULL,                    // local computer
+		NULL,                    // ServicesActive database 
+		SC_MANAGER_ALL_ACCESS);  // full access rights 
+
+	if (NULL == schSCManager) 
+	{
+		return FALSE;
+	}
+
+	// Get a handle to the service.
+
+	SC_HANDLE schService = ::OpenService( 
+		schSCManager,            // SCM database 
+		service_name.c_str(),               // name of service 
+		SERVICE_CHANGE_CONFIG);  // need change config access 
+
+	if (schService == NULL)
+	{ 
+		//printf("OpenService failed (%d)\n", GetLastError()); 
+		::CloseServiceHandle(schSCManager);
+		return FALSE;
+	}    
+
+	// Change the service description.
+	SERVICE_DESCRIPTION sd;
+	wchar_t* buff = new(std::nothrow)wchar_t[service_discription.length() + 1];
+	::memset(buff, 0, (service_discription.length() + 1) * sizeof(wchar_t));
+	::wcsncpy_s(buff, service_discription.length()+1, service_discription.c_str(), service_discription.length());
+	sd.lpDescription = buff;
+
+	BOOL bRet = FALSE;
+	if(!::ChangeServiceConfig2(
+		schService,                 // handle to service
+		SERVICE_CONFIG_DESCRIPTION, // change: description
+		&sd))                      // new description
+	{
+		//printf("ChangeServiceConfig2 failed\n");
+	}
+	else
+	{
+		//printf("Service description updated successfully.\n");
+		bRet = TRUE;
+	}
+
+	::delete [] buff;
+	CloseServiceHandle(schService); 
+	CloseServiceHandle(schSCManager);
+	return bRet;
+}
