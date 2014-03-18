@@ -16,7 +16,7 @@ public:
 	void Start();
 	double CostTime();
 #ifdef _DEBUG
-	void debug_log(const std::wstring log_msg);
+	void debug_log(const std::wstring& log_msg);
 #endif
 
 private:
