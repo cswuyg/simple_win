@@ -24,7 +24,7 @@ BOOL ServiceControl::InstallService(const std::wstring& bin_path, const std::wst
 		service_name.c_str(),   
 		SERVICE_ALL_ACCESS,		
 		SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
-		SERVICE_DEMAND_START,		
+		SERVICE_DEMAND_START,		//这里可以设置autostart
 		SERVICE_ERROR_NORMAL,	
 		bin_path.c_str(),				
 		NULL,
