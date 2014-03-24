@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "catch_pure_virtual_func_call", "catch_pure_virtual_func_call\catch_pure_virtual_func_call.vcxproj", "{444F2BF0-8080-4CF6-A9FC-25474EA31827}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "catch_pure_dll", "catch_pure_dll\catch_pure_dll.vcxproj", "{5CD3DFB0-9CFF-4674-A1E8-3DEBC53D2DDB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{444F2BF0-8080-4CF6-A9FC-25474EA31827}.Debug|Win32.ActiveCfg = Debug|Win32
+		{444F2BF0-8080-4CF6-A9FC-25474EA31827}.Debug|Win32.Build.0 = Debug|Win32
+		{444F2BF0-8080-4CF6-A9FC-25474EA31827}.Release|Win32.ActiveCfg = Release|Win32
+		{444F2BF0-8080-4CF6-A9FC-25474EA31827}.Release|Win32.Build.0 = Release|Win32
+		{5CD3DFB0-9CFF-4674-A1E8-3DEBC53D2DDB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5CD3DFB0-9CFF-4674-A1E8-3DEBC53D2DDB}.Debug|Win32.Build.0 = Debug|Win32
+		{5CD3DFB0-9CFF-4674-A1E8-3DEBC53D2DDB}.Release|Win32.ActiveCfg = Release|Win32
+		{5CD3DFB0-9CFF-4674-A1E8-3DEBC53D2DDB}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
